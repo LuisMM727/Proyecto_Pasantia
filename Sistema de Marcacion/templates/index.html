@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prueba Sitio</title>
+</head>
+<body>
+    <a href="{{url_for('marcados')}}" class="button is-success">Marcacion</a>
+    <p><a href="/generate-pdf" download>Descargar reporte (PDF)</a></p>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Nombre</th>
+
+            </tr>
+        </thead>
+        <tbody>
+            {% for user in usuarios %}
+            <tr>
+                <td>{{user[0]}}</td>
+                <td>{{user[1]}}</td>
+            </tr>
+            {% endfor %}
+        </tbody> 
+    </table>
+</body>
+</html>

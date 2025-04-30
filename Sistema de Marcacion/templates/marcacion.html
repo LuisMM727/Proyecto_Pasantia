@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Marcacion</title>
+</head>
+<body>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>ID</th>
+
+                <th>Marcacion</th>
+
+                <th>Fecha</th>
+
+                <th>Hora</th>
+
+
+            </tr>
+        </thead>
+        <tbody>
+            {% for marca in marcacion %}
+            <tr>
+                <td>{{marca[0]}}</td>
+                <td>{{marca[1]}}</td>
+            </tr>
+            {% endfor %}
+        </tbody> 
+    </table>
+</body>
+</html>
