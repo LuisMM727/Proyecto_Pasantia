@@ -91,7 +91,7 @@ ENGINE = InnoDB;
 CREATE TABLE IF NOT EXISTS `SistemaMC`.`usuarios` (
   `id_usuario` INT NOT NULL AUTO_INCREMENT,
   `nombre_usuario` VARCHAR(50) NOT NULL,
-  `password_usuario` VARCHAR(50) NOT NULL,
+  `password_usuario` VARCHAR(255) NOT NULL,
   `activo` TINYINT NOT NULL,
   PRIMARY KEY (`id_usuario`))
 ENGINE = InnoDB;
