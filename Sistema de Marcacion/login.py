@@ -6,12 +6,7 @@ app = Flask(__name__)
 app.secret_key = 'clave_super_secreta'
 
 def conectar_bd():
-    return pymysql.connect(
-        host='localhost',
-        user='root',
-        password='',
-        db='sistemamc',
-        cursorclass=pymysql.cursors.DictCursor
+    return pymysql.connect(host='localhost', user='root', password='', db='sistemamc', cursorclass=pymysql.cursors.DictCursor
     )
 
 @app.route('/', methods=['GET', 'POST'])
@@ -22,13 +17,13 @@ def login():
 
         conexion = conectar_bd()
         cursor = conexion.cursor()
-        cursor.execute("SELECT * FROM usuarios WHERE usuario = %s", (usuario,))
+        cursor.execute("SELECT * FROM usuarios WHERE nombre_usuario = %s", (usuario,))
         datos = cursor.fetchone()
 
         if datos:
-            if check_password_hash(datos['password'], password):
-                session['usuario'] = datos['usuario']
-                return redirect(url_for('dashboard'))
+            if check_password_hash(datos['password_usuario'], password):
+                session['usuario'] = datos['nombre_usuario']
+                return redirect(url_for('inicio'))
             else:
                 flash('Contraseña incorrecta')
         else:
@@ -38,9 +33,10 @@ def login():
 
     return render_template('login.html')
 
-@app.route('/dashboard')
-def dashboard():
+@app.route('/inicio')
+def usuario():
     if 'usuario' in session:
+        usuarios = obtener_usuarios()
         return f"Bienvenido, {session['usuario']} <br><a href='/logout'>Cerrar sesion</a>"
     return redirect(url_for('login'))
 
