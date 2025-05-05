@@ -1,5 +1,4 @@
 
-
 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0;
 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0;
 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION';
@@ -9,13 +8,13 @@ SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,N
 -- -----------------------------------------------------
 
 -- -----------------------------------------------------
--- BD SistemaMC
+-- La base de datps SistemaMC
 -- -----------------------------------------------------
 CREATE SCHEMA IF NOT EXISTS `SistemaMC` DEFAULT CHARACTER SET utf8 ;
 USE `SistemaMC` ;
 
 -- -----------------------------------------------------
--- Tabla horarios
+-- Table horarios
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `SistemaMC`.`horarios` (
   `id_horario` INT NOT NULL AUTO_INCREMENT,
@@ -67,19 +66,39 @@ ENGINE = InnoDB;
 
 
 -- -----------------------------------------------------
+-- Tabla dispositivos
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `SistemaMC`.`dispositivos` (
+  `id_dispositivo` INT NOT NULL AUTO_INCREMENT,
+  `descripcion_dispositivo` VARCHAR(100) NOT NULL,
+  `nombre_dispositivo` VARCHAR(50) NOT NULL,
+  `activo` TINYINT NOT NULL,
+  `puerto` VARCHAR(45) NOT NULL,
+  `IP_dispositivo` VARCHAR(45) NOT NULL,
+  PRIMARY KEY (`id_dispositivo`))
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
 -- Tabla marcados
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `SistemaMC`.`marcados` (
   `id_marcacion` INT NOT NULL AUTO_INCREMENT,
-  `id_marcador` INT NOT NULL,
   `marcacion` TIMESTAMP NOT NULL,
   `tipo` VARCHAR(50) NOT NULL,
   `FK_empleado` INT NOT NULL,
+  `FK_dispositivos` INT NOT NULL,
   PRIMARY KEY (`id_marcacion`),
   INDEX `FK_Empleado_idx` (`FK_empleado`),
+  INDEX `FK_dispositivos_idx` (`FK_dispositivos`),
   CONSTRAINT `FK_Empleado`
     FOREIGN KEY (`FK_empleado`)
     REFERENCES `SistemaMC`.`empleado` (`id_empleado`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `FK_dispositivos`
+    FOREIGN KEY (`FK_dispositivos`)
+    REFERENCES `SistemaMC`.`dispositivos` (`id_dispositivo`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;
