@@ -1,28 +1,48 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Prueba Sitio</title>
+    <title>Panel de Administración</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="estilo.css">
 </head>
 <body>
-    <a href="{{url_for('marcados')}}" class="button is-success">Marcacion</a>
-    <table class="table">
-        <thead>
-            <tr>
-                <th>ID</th>
-                <th>Nombre</th>
 
-            </tr>
-        </thead>
-        <tbody>
-            {% for user in usuarios %}
-            <tr>
-                <td>{{user[0]}}</td>
-                <td>{{user[1]}}</td>
-            </tr>
-            {% endfor %}
-        </tbody> 
-    </table>
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <h4 class="text-white text-center py-3">Mi Panel</h4>
+        <a href="#">Inicio</a>
+        <a href="#">Empleados</a>
+        <a href="#">Usuarios</a>
+        <a href="{{ url_for('logout') }}">Cerrar sesión</a>
+    </div>
+
+    <!-- Contenido principal -->
+    <div class="main-content">
+        <!-- Topbar -->
+        <div class="topbar d-flex justify-content-between align-items-center">
+            <span>Bienvenido, {{ session['usuario'] }}</span>
+        </div>
+
+        <!-- Contenido -->
+        <h3 class="mt-4">Lista de Empleados</h3>
+        <table class="table table-striped mt-3">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Nombre</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for emp in empleados %}
+                <tr>
+                    <td>{{ emp.id }}</td>
+                    <td>{{ emp.nombre }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
 </body>
 </html>
