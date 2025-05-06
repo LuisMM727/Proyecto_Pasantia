@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request, redirect, session, url_for, flash
 from modulos.conexionDB import conexion
 from werkzeug.security import check_password_hash
+from modulos.funciones import obtener_marcacion
 app = Flask(__name__)
 app.secret_key = 'clave'
 
@@ -12,7 +13,7 @@ def login():
         password = request.form['password']
 
         cursor = conexion.cursor()
-        cursor.execute("SELECT * FROM usuarios WHERE nombre_usuario = %s", (usuario,))
+        cursor.execute("SELECT * FROM usuarios WHERE nombre_usuario = %s", (usuario))
         datos = cursor.fetchone()
 
         if datos:
@@ -34,10 +35,12 @@ def index():
         return redirect(url_for('login'))
     return render_template("index.html")
 
-
-
-
-
+@app.route('/marcacion')
+def marcacion():
+    marcacion = obtener_marcacion()
+    if 'usuario' not in session:
+        return redirect(url_for('login'))
+    return render_template("marcacion.html", marcacion=marcacion)
 
 
 @app.route('/logout')

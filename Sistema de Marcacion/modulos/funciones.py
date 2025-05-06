@@ -1,4 +1,4 @@
-from conexionDB import conexion
+import modulos.conexionDB as conn
 from io import BytesIO
 from reportlab.pdfgen import canvas
 
@@ -13,11 +13,11 @@ def UsuarioIn(users):
 		
 #Funcion para Insertar marcaciones a la BD
 def Marcados(marcaciones):
-	cursor = conexion.cursor()
+	cursor = conn.conexion.cursor()
 	for marca in marcaciones:
-		consulta = "INSERT INTO marcados(marcacion) VALUES (%s);"
-		cursor.execute(consulta, (marca.timestamp))
-		cursor.commit()
+		consulta = "INSERT INTO marcados(id_marcacion, marcacion) VALUES (%s, %s);"
+		cursor.execute(consulta, (marca.user_id, marca.timestamp))
+		cursor.connection.commit()
 	cursor.close()
       
 #Funcion para obtener usuarios de la BD
@@ -31,11 +31,12 @@ def obtener_usuarios():
 
 #Funcion para obtener las marcaciones de la BD
 def obtener_marcacion():
+    cursor = conn.conexion.cursor()
     marcacion = []
-    with conexion.cursor() as cursor:
+    with cursor.connection.cursor() as cursor:
         cursor.execute("SELECT id_marcacion, marcacion FROM marcados")
         marcacion = cursor.fetchall()
-    conexion.close()
+    conn.conexion.close()
     return marcacion
 
 #Funcion para convertir html a PDF
