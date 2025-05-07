@@ -34,7 +34,7 @@ def obtener_marcacion():
     cursor = conn.conexion.cursor()
     marcacion = []
     with cursor.connection.cursor() as cursor:
-        cursor.execute("SELECT id_marcacion, marcacion FROM marcados")
+        cursor.execute("SELECT id_marcado, id_marcacion, marcacion FROM marcados")
         marcacion = cursor.fetchall()
     conn.conexion.close()
     return marcacion

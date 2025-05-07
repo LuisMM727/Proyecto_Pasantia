@@ -43,6 +43,7 @@ def marcacion():
     return render_template("marcacion.html", marcacion=marcacion)
 
 
+
 @app.route('/logout')
 def logout():
     session.pop('usuario', None)
