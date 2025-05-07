@@ -2,7 +2,7 @@
 from werkzeug.security import generate_password_hash
 import pymysql
 
-conexion = pymysql.connect(host='localhost', user='root', password='', db='marcador', cursorclass=pymysql.cursors.DictCursor)
+conexion = pymysql.connect(host='localhost', user='root', password='', db='sistemamc', cursorclass=pymysql.cursors.DictCursor)
 
 cursor = conexion.cursor()
 usuario = 'admin'
