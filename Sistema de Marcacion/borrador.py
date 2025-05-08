@@ -1,6 +1,2 @@
-from modulos.funciones import obtener_marcacion
+from modulos.funciones import Capturar_DatosZK
 
-marcacion = obtener_marcacion()
-
-for marca in marcacion:
-    print(marca)

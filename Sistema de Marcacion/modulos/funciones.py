@@ -1,10 +1,11 @@
-import modulos.conexionDB as conn
+import conexionDB as con
 from io import BytesIO
 from reportlab.pdfgen import canvas
+from zk import ZK
 
 #Funcion para insertar usuarios
 def UsuarioIn(users):
-	cursor = conexion.cursor()
+	cursor = con.conexion.cursor()
 	for user in users:
 		consulta = "INSERT INTO usuarios(id_user, Nombre) VALUES (%s, %s);"
 		cursor.execute(consulta, (user.user_id, user.name))
@@ -13,9 +14,9 @@ def UsuarioIn(users):
 		
 #Funcion para Insertar marcaciones a la BD
 def Marcados(marcaciones):
-	cursor = conn.conexion.cursor()
+	cursor = con.conexion.cursor()
 	for marca in marcaciones:
-		consulta = "INSERT INTO marcados(id_marcacion, marcacion) VALUES (%s, %s);"
+		consulta = "INSERT INTO marcados(id_marcacion, marcacion, tipo, FK_empleado, FK_dispositivos) VALUES (%s, %s, %s, %s, %s);"
 		cursor.execute(consulta, (marca.user_id, marca.timestamp))
 		cursor.connection.commit()
 	cursor.close()
@@ -23,20 +24,42 @@ def Marcados(marcaciones):
 #Funcion para obtener usuarios de la BD
 def obtener_usuarios():
     usuarios = []
+    conexion = con.conexion
     with conexion.cursor() as cursor:
         cursor.execute("SELECT id_user, Nombre FROM usuarios")
         usuarios = cursor.fetchall()
     conexion.close()
     return usuarios
 
+#Funcion para obtener todos los dispositivos de la BD
+def obtener_dispositivos():
+    dispositivos = []
+    conexion = con.conexion
+    with conexion.cursor() as cursor:
+        cursor.execute("SELECT * FROM dispositivos WHERE activo =  1")
+        dispositivos = cursor.fetchall()
+    conexion.close()
+    return dispositivos
+
+
+def obtener_dispositivo_ID(id):
+    dispositivoID = []
+    conexion = con.conexion
+    with conexion.cursor() as cursor:
+        cursor.execute(f"SELECT * FROM dispositivos WHERE id_dispositivo = {id}")
+        dispositivoID = cursor.fetchall()
+    conexion.close()
+    return dispositivoID
+
+
 #Funcion para obtener las marcaciones de la BD
 def obtener_marcacion():
-    cursor = conn.conexion.cursor()
+    cursor = con.conexion.cursor()
     marcacion = []
     with cursor.connection.cursor() as cursor:
         cursor.execute("SELECT id_marcado, id_marcacion, marcacion FROM marcados")
         marcacion = cursor.fetchall()
-    conn.conexion.close()
+    con.conexion.close()
     return marcacion
 
 #Funcion para convertir html a PDF
@@ -57,3 +80,27 @@ def generate_pdf_file(usuarios):
  
     buffer.seek(0)
     return buffer
+
+#Funcion para conectar al dispositivo ZK para capturar los datos
+def Capturar_DatosZK():
+    dispositivos = obtener_dispositivos()
+    for dispositivo in dispositivos:
+        zk = ZK(dispositivo['IP_dispositivo'], port=dispositivo['puerto'], timeout=5)
+        print(zk,"hola")
+        conn = zk.connect()
+        conn.disable_device()
+        users = conn.get_users()
+        conn.enable_device()
+        conn.disconnect()
+        #marcaciones = conn.get_attendance()
+        print(users)
+
+
+def obtener_dispositivoZK():
+    dispositivo = []
+    conexion = con.conexion
+    with conexion.cursor() as cursor:
+        cursor.execute("SELECT  ")
+        dispositivo = cursor.fetchall()
+    conexion.close()
+    return dispositivo

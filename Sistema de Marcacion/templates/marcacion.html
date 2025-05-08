@@ -44,8 +44,10 @@
                 {% for marca in marcacion %}
                 <tr>
                     <td>{{marca.id_marcado}}</td>
-                    <td>{{marca.id_marcacion}}</td>
                     <td>{{marca.marcacion}}</td>
+                    <td>{{marca.tipo}}</td>
+                    <td>{{marca.FK_empleado}}</td>
+                    <td>{{marca.FK_dispositivos}}</td>
                 </tr>
                 {% endfor %}
             </tbody> 
