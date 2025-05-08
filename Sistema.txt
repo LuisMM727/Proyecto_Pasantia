@@ -1,0 +1,49 @@
+-Login:
+El usuario se conecta y ingresa a la pantalla de login al conectarse se le asocia con el usuario de la BD del sistema
+
+-Home
+al logearse, debe elegir a que dispositivo conectarse(El dispositivo ZK) lo que va a traer los datos el mismo, cuyos datos se van a guardar o añadir a la BD.
+también tendrá acceso a la barra lateral la cual le dará multiples opciones como: marcaciones, dispositivos, empleados, usuarios(solo acceso el admin), departamentos, horarios. Para tener control sobre los siguientes pantallas.
+
+-Marcaciones
+Esta pantalla mostrar un reporte general de toda las marcaciones del dispositivo, cuyos datos del reporte estarán almacenados en la tabla marcados de la BD, cuyos campos son: id, marcación(el tiempo de la marcación), tipo, FK_empleado(el nombre del empleado), FK_dispositivos(nombre del dispositivo), genera una reporte mostrado en una tabla, también tiene la opción (botón) para generar un pdf en base a la tabla de reporte que se muestra en la tabla
+
+-Dispositivo:
+Esta pantalla se utiliza para controlar los dispositivos, muestra un listado de los mismos de la tabla dispositivos de la BD, cuyos campos son: id, descripción, nombre,  activo(si el dispositivo se encuentra en uso o no), puerto, IP.
+Tambien  la opción(Boton) para acceder a las siguientes pantallas: editar, agregar.
+
+-Editar_Dispositivo:
+Esta pantalla se usa para editar un ya existente dato de la tabla de dispositivos, a traves de un formulario el cual dará para cambiar los datos, como nombre puertos, etc y poder guardarlo o actualizarlo
+
+-Agregar_Dispositivo:
+Esta pantalla se usa para agregar un dispositivo nuevo, consta de un formulario para rellenar los campos que pide la tabla dispositivos como la Ip, nombre etc y subirlo y guardarlo en la tabla dispositivos
+
+-Empleados
+Esta pantalla mostrara los datos en una tabla de los empleados almacenados en la tabla empleados de la BD, cuyos campos son: id, id(id del empleado en la marcación), nombre, activo, FK_departamento(nombre del departamento que esta asignado).
+Solo se podrá ver, no se podrá editar o agregar
+
+-Departamento:
+Esta pantalla mostrara los departamentos almacenados en la tabla departamentos de la BD, cuyos campos son: ip, nombre, activo, horarios(a que horario esta relacionado el departamento).
+Se tendrá acceso a las siguientes pantallas: editar, agregar.
+
+-Agregar_departamento:
+Esta pantalla se usa para agregar un nuevo departamento, que consta con un formulario para rellenar los campos que consta la tabla departamento y subirlos y almacenar en la respectiva tabla
+
+-Editar_departamento:
+Esta pantalla se usa para editar un dato ya existente de la tabla departamentos, que consta de un formulario para editar los datos del ya existentes a los que se quiera modificar, para luego subirlo y almacenarlo.
+
+-Horarios:
+Esta pantalla mostrara los datos en una tabla de los horarios que están almacenados en la tabla horarios de la BD, cuyos campos son:
+
+id, nombre, entrada, salida, tolerancia_minima, tolerancia_maxima, activo.
+Se tendrá acceso a las siguientes pantallas: editar, agregar
+
+-Editar_horarios:
+Esta pantalla se usa para editar un dato ya existente de la tabla horarios, que consta de un formulario para editar los datos del ya existentes a los que se quiera modificar, para luego subirlo y almacenarlo.
+
+-Agregar_horarios:
+Esta pantalla se usa para agregar un nuevo horarios, que consta con un formulario para rellenar los campos que consta la tabla horarios y subirlos y almacenar en la respectiva tabla
+
+-Usuarios:
+esta pantalla podrá mostrar usuarios de la tabla usuarios, que solo tendrá acceso el administrador del sistema que tendrá permitido editar y agregar usuarios a la tabla de la BD
+
