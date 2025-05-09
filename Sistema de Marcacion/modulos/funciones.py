@@ -1,4 +1,5 @@
-import conexionDB as con
+from flask import Flask, render_template, request, redirect, session, url_for, flash
+import modulos.conexionDB as con
 from io import BytesIO
 from reportlab.pdfgen import canvas
 from zk import ZK
@@ -41,7 +42,7 @@ def obtener_dispositivos():
     conexion.close()
     return dispositivos
 
-
+#Funcion para obtener un dispositivo por su ID
 def obtener_dispositivo_ID(id):
     dispositivoID = []
     conexion = con.conexion
@@ -92,15 +93,36 @@ def Capturar_DatosZK():
         users = conn.get_users()
         conn.enable_device()
         conn.disconnect()
-        #marcaciones = conn.get_attendance()
+        print(users)
+
+#Funcion para conectar al dispositivo ZK para capturar los datos
+def Capturar_DatosZK():
+    dispositivos = obtener_dispositivos()
+    for dispositivo in dispositivos:
+        zk = ZK(dispositivo['IP_dispositivo'], port=dispositivo['puerto'], timeout=5)
+        print(zk,"hola")
+        conn = zk.connect()
+        conn.disable_device()
+        users = conn.get_users()
+        conn.enable_device()
+        conn.disconnect()
+        print(users, "hola")
+    
+
+#Funcion que obtiene los datos del formulario de dipositivos para hacer la conexion y tomar los datos
+def dispositivo_ZK(ip, puerto):
+        zk = ZK(ip, port=int(puerto), timeout=5)
+        print("hola")
+        conn = zk.connect()
+        conn.disable_device()
+        users =  conn.get_users
+        conn.enable_device()
+        conn.disconnect()
         print(users)
 
 
-def obtener_dispositivoZK():
-    dispositivo = []
-    conexion = con.conexion
-    with conexion.cursor() as cursor:
-        cursor.execute("SELECT  ")
-        dispositivo = cursor.fetchall()
-    conexion.close()
-    return dispositivo
+
+
+#dispositivo_ZK('192.168.150.34', 4370)
+
+#Capturar_DatosZK()

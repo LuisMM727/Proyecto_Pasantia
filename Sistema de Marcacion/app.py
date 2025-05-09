@@ -1,7 +1,7 @@
 from flask import Flask, render_template, request, redirect, session, url_for, flash
-from modulos.conexionDB import conexion
+from modulos.conexionDB import conexion as con
 from werkzeug.security import check_password_hash
-from modulos.funciones import obtener_marcacion
+from modulos.funciones import obtener_marcacion, Capturar_DatosZK, dispositivo_ZK
 app = Flask(__name__)
 app.secret_key = 'clave'
 
@@ -12,7 +12,7 @@ def login():
         usuario = request.form['usuario']
         password = request.form['password']
 
-        cursor = conexion.cursor()
+        cursor = con.cursor()
         cursor.execute("SELECT * FROM usuarios WHERE nombre_usuario = %s", (usuario))
         datos = cursor.fetchone()
 
@@ -25,15 +25,38 @@ def login():
         else:
             flash('Usuario no encontrado')
 
-        conexion.close()
+        con.close()
 
     return render_template('login.html')
 
-@app.route('/index')
+
+@app.route('/index', methods=['GET', 'POST'])
 def index():
     if 'usuario' not in session:
         return redirect(url_for('login'))
+
+    if request.method == 'POST':
+        accion = request.form.get('accion')
+
+        if accion == 'conectar':
+            ip = request.form.get('ip_dispositivo')
+            puerto = request.form.get('puerto_dispositivo')
+            dispositivo_ZK(ip, puerto)
+            flash("Conectado al dispositivo")
+
+        elif accion == 'actualizar_todo':
+            Capturar_DatosZK()
+            flash("Todos los dispositivos actualizados correctamente.")
+
     return render_template("index.html")
+
+
+
+
+
+
+
+
 
 @app.route('/marcacion')
 def marcacion():
