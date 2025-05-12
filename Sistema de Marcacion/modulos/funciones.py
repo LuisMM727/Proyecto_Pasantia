@@ -1,4 +1,3 @@
-from flask import Flask, render_template, request, redirect, session, url_for, flash
 import modulos.conexionDB as con
 from io import BytesIO
 from reportlab.pdfgen import canvas
@@ -14,14 +13,17 @@ def UsuarioIn(users):
 	cursor.close()
 		
 #Funcion para Insertar marcaciones a la BD
-def Marcados(marcaciones):
-	cursor = con.conexion.cursor()
-	for marca in marcaciones:
-		consulta = "INSERT INTO marcados(id_marcacion, marcacion, tipo, FK_empleado, FK_dispositivos) VALUES (%s, %s, %s, %s, %s);"
-		cursor.execute(consulta, (marca.user_id, marca.timestamp))
-		cursor.connection.commit()
-	cursor.close()
-      
+def Marcados(marcaciones, nombre_ZK):
+    empleados = obtener_empleados()
+    departamento = obtener_departamentos()
+    horario = obtener_horarios()
+    cursor = con.conexion.cursor()
+    for marca in marcaciones:
+        consulta = "INSERT INTO marcados(marcacion, tipo, FK_empleado, FK_dispositivos) VALUES (%s, %s, %s, %s, %s);"
+        cursor.execute(consulta, (marca.timestamp,marca.user_id, nombre_ZK))
+        cursor.connection.commit()
+    cursor.close()
+        
 #Funcion para obtener usuarios de la BD
 def obtener_usuarios():
     usuarios = []
@@ -41,6 +43,41 @@ def obtener_dispositivos():
         dispositivos = cursor.fetchall()
     conexion.close()
     return dispositivos
+
+#Funcion para obtener todos los horarios de la BD
+def obtener_horarios():
+    horarios = []
+    conexion = con.conexion
+    with conexion.cursor() as cursor:
+        cursor.execute("SELECT * FROM horarios")
+        horarios = cursor.fetchall()
+    conexion.close()
+    return horarios
+
+#Funcion para obtener todos los departamentos de la BD
+def obtener_departamentos():
+    departamentos = []
+    conexion = con.conexion
+    with conexion.cursor() as cursor:
+        cursor.execute("SELECT * FROM departamentos")
+        departamentos = cursor.fetchall()
+    conexion.close()
+    return departamentos
+
+#Funcion para obtener todos los empleados de la BD
+def obtener_empleados():
+    empleados = []
+    conexion = con.conexion
+    with conexion.cursor() as cursor:
+        cursor.execute("SELECT * FROM empleados")
+        empleados = cursor.fetchall()
+    conexion.close()
+    return empleados
+
+
+
+
+
 
 #Funcion para obtener un dispositivo por su ID
 def obtener_dispositivo_ID(id):
@@ -87,42 +124,26 @@ def Capturar_DatosZK():
     dispositivos = obtener_dispositivos()
     for dispositivo in dispositivos:
         zk = ZK(dispositivo['IP_dispositivo'], port=dispositivo['puerto'], timeout=5)
-        print(zk,"hola")
-        conn = zk.connect()
-        conn.disable_device()
-        users = conn.get_users()
-        conn.enable_device()
-        conn.disconnect()
-        print(users)
 
-#Funcion para conectar al dispositivo ZK para capturar los datos
-def Capturar_DatosZK():
-    dispositivos = obtener_dispositivos()
-    for dispositivo in dispositivos:
-        zk = ZK(dispositivo['IP_dispositivo'], port=dispositivo['puerto'], timeout=5)
-        print(zk,"hola")
         conn = zk.connect()
         conn.disable_device()
         users = conn.get_users()
+        marcaciones = conn.get_attendance()
         conn.enable_device()
         conn.disconnect()
-        print(users, "hola")
+        UsuarioIn(users)
+        Marcados(marcaciones)
     
 
 #Funcion que obtiene los datos del formulario de dipositivos para hacer la conexion y tomar los datos
 def dispositivo_ZK(ip, puerto):
         zk = ZK(ip, port=int(puerto), timeout=5)
-        print("hola")
         conn = zk.connect()
         conn.disable_device()
         users =  conn.get_users
+        marcaciones = conn.get_attendance()
         conn.enable_device()
         conn.disconnect()
-        print(users)
+        UsuarioIn(users)
+        Marcados(marcaciones)
 
-
-
-
-#dispositivo_ZK('192.168.150.34', 4370)
-
-#Capturar_DatosZK()
