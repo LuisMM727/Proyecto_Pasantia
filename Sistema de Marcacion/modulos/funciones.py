@@ -2,6 +2,7 @@ import modulos.conexionDB as con
 from io import BytesIO
 from reportlab.pdfgen import canvas
 from zk import ZK
+from datetime import time
 
 #Funcion para insertar usuarios
 def UsuarioIn(users):
@@ -14,9 +15,7 @@ def UsuarioIn(users):
 		
 #Funcion para Insertar marcaciones a la BD
 def Marcados(marcaciones, nombre_ZK):
-    empleados = obtener_empleados()
-    departamento = obtener_departamentos()
-    horario = obtener_horarios()
+
     cursor = con.conexion.cursor()
     for marca in marcaciones:
         consulta = "INSERT INTO marcados(marcacion, tipo, FK_empleado, FK_dispositivos) VALUES (%s, %s, %s, %s, %s);"
@@ -146,4 +145,22 @@ def dispositivo_ZK(ip, puerto):
         conn.disconnect()
         UsuarioIn(users)
         Marcados(marcaciones)
+
+
+def EntradaoSalida(marcaciones): #Hacer un calculo para saber cuantas horas trabajo el empleado
+     marcacion_hora = marcaciones.time()
+     empleados =  obtener_empleados()
+     departamento = obtener_departamentos()
+     horarios = obtener_horarios
+     tipo
+     entrada_tarde 
+     for hora in horarios:
+          if hora['id_horario'] == departamento['FK_horario'] and  empleados['FK_departameto'] == departamento['id_departamento']:
+               if hora['entrada_manana'] >= marcacion_hora and hora['entrada_manana'] <= hora['tolerancia_manana']:
+                    tipo = 'entrada'
+               else:
+                    tipo = 'entrada'    
+                    entrada_tarde = 'tarde'
+                    
+               
 

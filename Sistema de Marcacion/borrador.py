@@ -36,10 +36,6 @@ def inferir_tipo_marcacion(fecha_hora_marcacion, horarios):
             if delta_entrada_tarde < timedelta(minutes=30):  # Ajusta la ventana de tiempo según necesites
                 return "ENTRADA"
 
-    # Si no coincide con ninguna hora de entrada cercana, podría ser una salida
-    # o una marcación fuera de horario. Necesitarías más lógica para diferenciar.
-    # Una opción simple es devolver "SALIDA" si ya hubo una "ENTRADA" hoy.
-    # Para una primera implementación, podrías devolver "DESCONOCIDO" si no coincide con entrada.
     return "DESCONOCIDO"
 
 def Marcados(marcaciones, nombre_ZK):
@@ -68,4 +64,3 @@ def Marcados(marcaciones, nombre_ZK):
     cursor.connection.commit()
     cursor.close()
 
-# (Las funciones obtener_empleados y obtener_horarios_por_departamento permanecen igual)
