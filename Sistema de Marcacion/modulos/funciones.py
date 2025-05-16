@@ -151,16 +151,53 @@ def EntradaoSalida(marcaciones): #Hacer un calculo para saber cuantas horas trab
      marcacion_hora = marcaciones.time()
      empleados =  obtener_empleados()
      departamento = obtener_departamentos()
-     horarios = obtener_horarios
+     horarios = obtener_horarios()
      tipo
-     entrada_tarde 
+     entrada_tardia
      for hora in horarios:
           if hora['id_horario'] == departamento['FK_horario'] and  empleados['FK_departameto'] == departamento['id_departamento']:
                if hora['entrada_manana'] >= marcacion_hora and hora['entrada_manana'] <= hora['tolerancia_manana']:
                     tipo = 'entrada'
                else:
                     tipo = 'entrada'    
-                    entrada_tarde = 'tarde'
+                    entrada_tardia = 'tarde'
                     
+                if hora['entrada_tarde'] >= marcacion_hora and hora['entrada_tarde'] <= hora['tolerancia_tarde']:
+                    tipo = 'entrada'
+                else:
+                    tipo = 'entrada'
+                    entrada_tardia = 'tarde'
+
+
                
 
+def Capturar_Horario_Departamento(FK_horario):
+    horario_departamento = []
+    conexion = con.conexion
+    with conexion.cursor() as cursor:
+        cursor.execute(f"SELECT * FROM horarios WHERE id_horario = {FK_horario} ")
+        horario_departamento = cursor.fetchall()
+    conexion.close()
+    return horario_departamento
+
+
+def obtener_departamentos_FK():
+    departamentos_FK = []
+    conexion = con.conexion
+    with conexion.cursor() as cursor:
+        cursor.execute("SELECT FK_horarios FROM departamentos")
+        departamentos_FK = cursor.fetchall()
+    conexion.close()
+    return departamentos_FK
+
+
+
+
+def prueba():
+    departamentos_FK = []
+    conexion = con.conexion
+    with conexion.cursor() as cursor:
+        cursor.execute("SELECT * FROM departamentos D INNER JOIN horarios H ON D.")
+        departamentos_FK = cursor.fetchall()
+    conexion.close()
+    return departamentos_FK
