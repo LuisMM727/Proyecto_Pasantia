@@ -14,12 +14,12 @@ def UsuarioIn(users):
 	cursor.close()
 		
 #Funcion para Insertar marcaciones a la BD
-def Marcados(marcaciones, nombre_ZK):
+def Marcados(marcaciones, nombre_ZK, tipo, detalle):
 
     cursor = con.conexion.cursor()
     for marca in marcaciones:
-        consulta = "INSERT INTO marcados(marcacion, tipo, FK_empleado, FK_dispositivos) VALUES (%s, %s, %s, %s, %s);"
-        cursor.execute(consulta, (marca.timestamp,marca.user_id, nombre_ZK))
+        consulta = "INSERT INTO marcados(marcacion, tipo, FK_empleado, FK_dispositivos, detalle) VALUES (%s, %s, %s, %s, %s);"
+        cursor.execute(consulta, (marca.timestamp, tipo, marca.user_id, nombre_ZK, detalle))
         cursor.connection.commit()
     cursor.close()
         
@@ -44,7 +44,7 @@ def obtener_dispositivos():
     return dispositivos
 
 #Funcion para obtener todos los horarios de la BD
-def obtener_horarios():
+def obtener_horarios_TODOS():
     horarios = []
     conexion = con.conexion
     with conexion.cursor() as cursor:
@@ -53,8 +53,20 @@ def obtener_horarios():
     conexion.close()
     return horarios
 
+def obtener_horarios(id):
+    horarios = []
+    conexion = con.conexion
+    with conexion.cursor() as cursor:
+        cursor.execute(f"SELECT * FROM horarios WHERE id_horario = {id}")
+        horarios = cursor.fetchall()
+    conexion.close()
+    return horarios
+
+
+
+
 #Funcion para obtener todos los departamentos de la BD
-def obtener_departamentos():
+def obtener_departamentos_TODOS():
     departamentos = []
     conexion = con.conexion
     with conexion.cursor() as cursor:
@@ -63,8 +75,18 @@ def obtener_departamentos():
     conexion.close()
     return departamentos
 
+
+def obtener_departamentos(id):
+    departamentos = []
+    conexion = con.conexion
+    with conexion.cursor() as cursor:
+        cursor.execute(f"SELECT * FROM departamentos WHERE id_departamento = {id}")
+        departamentos = cursor.fetchall()
+    conexion.close()
+    return departamentos
+
 #Funcion para obtener todos los empleados de la BD
-def obtener_empleados():
+def obtener_empleados_TODOS():
     empleados = []
     conexion = con.conexion
     with conexion.cursor() as cursor:
@@ -72,6 +94,19 @@ def obtener_empleados():
         empleados = cursor.fetchall()
     conexion.close()
     return empleados
+
+
+
+
+def obtener_empleados(id):
+    empleados = []
+    conexion = con.conexion
+    with conexion.cursor() as cursor:
+        cursor.execute(f"SELECT * FROM empleados WHERE id_empleado_marcador = {id}")
+        empleados = cursor.fetchall()
+    conexion.close()
+    return empleados
+
 
 
 
@@ -130,8 +165,10 @@ def Capturar_DatosZK():
         marcaciones = conn.get_attendance()
         conn.enable_device()
         conn.disconnect()
+        nombre_ZK = dispositivo['id_dispositivo']
+        tipo, detalle = EntradaoSalida(marcaciones)
         UsuarioIn(users)
-        Marcados(marcaciones)
+        Marcados(marcaciones, nombre_ZK, tipo, detalle)
     
 
 #Funcion que obtiene los datos del formulario de dipositivos para hacer la conexion y tomar los datos
@@ -147,26 +184,51 @@ def dispositivo_ZK(ip, puerto):
         Marcados(marcaciones)
 
 
-def EntradaoSalida(marcaciones): #Hacer un calculo para saber cuantas horas trabajo el empleado
-     marcacion_hora = marcaciones.time()
-     empleados =  obtener_empleados()
-     departamento = obtener_departamentos()
-     horarios = obtener_horarios()
-     tipo
-     entrada_tardia
-     for hora in horarios:
-          if hora['id_horario'] == departamento['FK_horario'] and  empleados['FK_departameto'] == departamento['id_departamento']:
-               if hora['entrada_manana'] >= marcacion_hora and hora['entrada_manana'] <= hora['tolerancia_manana']:
-                    tipo = 'entrada'
-               else:
-                    tipo = 'entrada'    
-                    entrada_tardia = 'tarde'
-                    
-                if hora['entrada_tarde'] >= marcacion_hora and hora['entrada_tarde'] <= hora['tolerancia_tarde']:
-                    tipo = 'entrada'
-                else:
-                    tipo = 'entrada'
-                    entrada_tardia = 'tarde'
+#Funcion para saber si la marcacion es de tipo Entrada o Salida y cuantas horas trabajo 
+def EntradaoSalida(marcaciones): 
+
+    for marca in marcaciones:
+        empleado = obtener_empleados(marca.user_id)
+        departamento = obtener_departamentos(empleado['FK_departamento'])
+        horarios = obtener_horarios(departamento['FK_horarios'])
+        hora = marca.timestamp.time()
+        if horarios['entrada_manana'] >= hora  or horarios['entrada_manana'] <= hora  and hora  <= horarios['tolerancia_manana']:
+            tipo = 'entrada'
+        else:
+            tipo = 'entrada'    
+            detalle = 'tarde'
+        
+        if horarios['salida_manana'] >= hora:
+            horas_trabajadas = horarios['salida_manana'] - horarios['entrada_manana']
+            tipo = 'salida'
+        else:
+            horas_trabajadas = horarios['salida_manana'] - horarios['entrada_manana']
+            tipo = 'salida'
+            detalle ='temprana'
+
+        if horarios['entrada_tarde'] >= hora  or horarios['entrada_tarde'] <= hora and hora <= horarios['tolerancia_tarde']:
+            tipo = 'entrada'
+        else:
+            tipo = 'entrada'
+            detalle ='tarde'
+
+        if horarios['salida_tarde'] >= hora:
+            horas_trabajadas = horarios['salida_tarde'] - horarios['entrada_tarde']
+            tipo = 'salida'
+        else:
+            horas_trabajadas = horarios['salida_tarde'] - horarios['entrada_salida']
+            tipo = 'entrada'
+            detalle ='temprana'
+    return tipo, detalle, horas_trabajadas
+
+
+
+
+
+
+
+
+
 
 
                

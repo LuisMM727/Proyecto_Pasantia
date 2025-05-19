@@ -37,8 +37,7 @@ def index():
 
     if request.method == 'POST':
         accion = request.form.get('accion')
-
-        if accion == 'conectar':
+        if accion == 'conectar':    
             ip = request.form.get('ip_dispositivo')
             puerto = request.form.get('puerto_dispositivo')
             dispositivo_ZK(ip, puerto)
