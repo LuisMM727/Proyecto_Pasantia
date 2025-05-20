@@ -1,8 +1,9 @@
-import modulos.conexionDB as con
+import conexionDB as con
 from io import BytesIO
 from reportlab.pdfgen import canvas
 from zk import ZK
-from datetime import time
+from datetime import  datetime, time
+
 
 #Funcion para insertar usuarios
 def UsuarioIn(users):
@@ -14,12 +15,12 @@ def UsuarioIn(users):
 	cursor.close()
 		
 #Funcion para Insertar marcaciones a la BD
-def Marcados(marcaciones, nombre_ZK, tipo, detalle):
+def Marcados(marcaciones, nombre_ZK, tipo):
 
     cursor = con.conexion.cursor()
     for marca in marcaciones:
-        consulta = "INSERT INTO marcados(marcacion, tipo, FK_empleado, FK_dispositivos, detalle) VALUES (%s, %s, %s, %s, %s);"
-        cursor.execute(consulta, (marca.timestamp, tipo, marca.user_id, nombre_ZK, detalle))
+        consulta = "INSERT INTO marcados(marcacion, tipo, FK_empleado, FK_dispositivos) VALUES (%s, %s, %s, %s);"
+        cursor.execute(consulta, (marca.timestamp, tipo, marca.user_id, nombre_ZK))
         cursor.connection.commit()
     cursor.close()
         
@@ -166,10 +167,12 @@ def Capturar_DatosZK():
         conn.enable_device()
         conn.disconnect()
         nombre_ZK = dispositivo['id_dispositivo']
-        tipo, detalle = EntradaoSalida(marcaciones)
+
+        tipo, _, _ = EntradaoSalida(marcaciones)
         UsuarioIn(users)
-        Marcados(marcaciones, nombre_ZK, tipo, detalle)
-    
+        Marcados(marcaciones, nombre_ZK, tipo)
+
+
 
 #Funcion que obtiene los datos del formulario de dipositivos para hacer la conexion y tomar los datos
 def dispositivo_ZK(ip, puerto):
@@ -182,6 +185,7 @@ def dispositivo_ZK(ip, puerto):
         conn.disconnect()
         UsuarioIn(users)
         Marcados(marcaciones)
+
 
 
 #Funcion para saber si la marcacion es de tipo Entrada o Salida y cuantas horas trabajo 
@@ -255,11 +259,28 @@ def obtener_departamentos_FK():
 
 
 
-def prueba():
-    departamentos_FK = []
+
+
+def prueba(marcaciones): 
+
+    for marca in marcaciones:
+
+        hora = marca.timestamp.time()
+
+        horario = datetime.strptime("06:45:00","%H:%M:%S").time()
+        if horario >= hora  or horario <= hora  and hora  <= horario:
+            print("Entrada", hora)
+        else:
+            print("Salida", hora)
+
+def Actualizar_Datos(id_dispositivo, marcacion):
     conexion = con.conexion
     with conexion.cursor() as cursor:
-        cursor.execute("SELECT * FROM departamentos D INNER JOIN horarios H ON D.")
-        departamentos_FK = cursor.fetchall()
+        cursor.execute(f"SELECT marcacion FROM marcados WHERE FK_dispositivos = {id_dispositivo} ORDER BY  marcacion DESC LIMIT 1")
+        dispositivo = cursor.fetchone()['marcacion']
     conexion.close()
-    return departamentos_FK
+
+    for marca in marcacion:
+        if marca.timestamp >= dispositivo:
+            EntradaoSalida()
+
