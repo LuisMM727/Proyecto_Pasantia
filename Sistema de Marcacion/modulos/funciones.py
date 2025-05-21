@@ -4,6 +4,8 @@ from reportlab.pdfgen import canvas
 from zk import ZK
 from datetime import  datetime, time
 
+from generate_zk_testdata import data
+
 
 #Funcion para insertar usuarios
 def UsuarioIn(users):
@@ -25,7 +27,7 @@ def Marcados(marcaciones, nombre_ZK, tipo):
     cursor.close()
         
 #Funcion para obtener usuarios de la BD
-def obtener_usuarios():
+def obtener_usuario():
     usuarios = []
     conexion = con.conexion
     with conexion.cursor() as cursor:
@@ -44,17 +46,17 @@ def obtener_dispositivos():
     conexion.close()
     return dispositivos
 
-#Funcion para obtener todos los horarios de la BD
-def obtener_horarios_TODOS():
-    horarios = []
+def obtener_dispositivos_Prueba():
     conexion = con.conexion
+    dispositivosPrueba = []
     with conexion.cursor() as cursor:
-        cursor.execute("SELECT * FROM horarios")
-        horarios = cursor.fetchall()
+        cursor.execute("SELECT id_dispositivo FROM dispositivos WHERE id_dispositivo = 2")
+        dispositivosPrueba = cursor.fetchall()
     conexion.close()
-    return horarios
+    return dispositivosPrueba
 
-def obtener_horarios(id):
+#Funcion para obtener un horario de la BD a traves de la FK  de departamento
+def obtener_horario(id):
     horarios = []
     conexion = con.conexion
     with conexion.cursor() as cursor:
@@ -64,20 +66,8 @@ def obtener_horarios(id):
     return horarios
 
 
-
-
-#Funcion para obtener todos los departamentos de la BD
-def obtener_departamentos_TODOS():
-    departamentos = []
-    conexion = con.conexion
-    with conexion.cursor() as cursor:
-        cursor.execute("SELECT * FROM departamentos")
-        departamentos = cursor.fetchall()
-    conexion.close()
-    return departamentos
-
-
-def obtener_departamentos(id):
+#Funcion para obtener un departamento de la BD a traves de la FK del empleado
+def obtener_departamento(id):
     departamentos = []
     conexion = con.conexion
     with conexion.cursor() as cursor:
@@ -86,20 +76,8 @@ def obtener_departamentos(id):
     conexion.close()
     return departamentos
 
-#Funcion para obtener todos los empleados de la BD
-def obtener_empleados_TODOS():
-    empleados = []
-    conexion = con.conexion
-    with conexion.cursor() as cursor:
-        cursor.execute("SELECT * FROM empleados")
-        empleados = cursor.fetchall()
-    conexion.close()
-    return empleados
-
-
-
-
-def obtener_empleados(id):
+#Funcion para obtener  un empleado de la BD a traves de su id del marcador
+def obtener_empleado(id):
     empleados = []
     conexion = con.conexion
     with conexion.cursor() as cursor:
@@ -108,21 +86,6 @@ def obtener_empleados(id):
     conexion.close()
     return empleados
 
-
-
-
-
-
-
-#Funcion para obtener un dispositivo por su ID
-def obtener_dispositivo_ID(id):
-    dispositivoID = []
-    conexion = con.conexion
-    with conexion.cursor() as cursor:
-        cursor.execute(f"SELECT * FROM dispositivos WHERE id_dispositivo = {id}")
-        dispositivoID = cursor.fetchall()
-    conexion.close()
-    return dispositivoID
 
 
 #Funcion para obtener las marcaciones de la BD
@@ -154,23 +117,29 @@ def generate_pdf_file(usuarios):
     buffer.seek(0)
     return buffer
 
-#Funcion para conectar al dispositivo ZK para capturar los datos
-def Capturar_DatosZK():
-    dispositivos = obtener_dispositivos()
-    for dispositivo in dispositivos:
-        zk = ZK(dispositivo['IP_dispositivo'], port=dispositivo['puerto'], timeout=5)
 
-        conn = zk.connect()
-        conn.disable_device()
-        users = conn.get_users()
-        marcaciones = conn.get_attendance()
-        conn.enable_device()
-        conn.disconnect()
-        nombre_ZK = dispositivo['id_dispositivo']
+def Capturar_DatosZK(data):
+    # try:
+    #     dispositivos = obtener_dispositivos()
+    #     for dispositivo in dispositivos:
+    #         zk = ZK(dispositivo['IP_dispositivo'], port=dispositivo['puerto'], timeout=5)
 
-        tipo, _, _ = EntradaoSalida(marcaciones)
-        UsuarioIn(users)
-        Marcados(marcaciones, nombre_ZK, tipo)
+    #         conn = zk.connect()
+    #         conn.disable_device()
+    #         #users = conn.get_users()
+    #         marcaciones = conn.get_attendance()
+    #         conn.enable_device()
+    #         conn.disconnect()
+    #         #nombre_ZK = dispositivo['id_dispositivo']
+    #         #Actualizar_Datos(nombre_ZK, marcaciones)
+    #         for marca in marcaciones:
+    #              print(marca)
+    # except Exception as e:
+        #print(f"Error: {e}")
+        dipositivoPrueba = obtener_dispositivos_Prueba()
+        marcaciones = data
+        nombre_ZK = dipositivoPrueba[0]
+        Actualizar_Datos(nombre_ZK, marcaciones)
 
 
 
@@ -192,10 +161,13 @@ def dispositivo_ZK(ip, puerto):
 def EntradaoSalida(marcaciones): 
 
     for marca in marcaciones:
-        empleado = obtener_empleados(marca.user_id)
-        departamento = obtener_departamentos(empleado['FK_departamento'])
-        horarios = obtener_horarios(departamento['FK_horarios'])
+        empleado = obtener_empleado(marca.user_id)
+        departamento = obtener_departamento(empleado['FK_departamento'])
+        horarios = obtener_horario(departamento['FK_horarios'])
         hora = marca.timestamp.time()
+        detalle = []
+        tipo = []
+        horas_trabajadas = []
         if horarios['entrada_manana'] >= hora  or horarios['entrada_manana'] <= hora  and hora  <= horarios['tolerancia_manana']:
             tipo = 'entrada'
         else:
@@ -203,10 +175,10 @@ def EntradaoSalida(marcaciones):
             detalle = 'tarde'
         
         if horarios['salida_manana'] >= hora:
-            horas_trabajadas = horarios['salida_manana'] - horarios['entrada_manana']
+            horas_trabajadas = hora - horarios['entrada_manana']
             tipo = 'salida'
         else:
-            horas_trabajadas = horarios['salida_manana'] - horarios['entrada_manana']
+            horas_trabajadas = hora - horarios['entrada_manana']
             tipo = 'salida'
             detalle ='temprana'
 
@@ -217,10 +189,10 @@ def EntradaoSalida(marcaciones):
             detalle ='tarde'
 
         if horarios['salida_tarde'] >= hora:
-            horas_trabajadas = horarios['salida_tarde'] - horarios['entrada_tarde']
+            horas_trabajadas = hora - horarios['entrada_tarde']
             tipo = 'salida'
         else:
-            horas_trabajadas = horarios['salida_tarde'] - horarios['entrada_salida']
+            horas_trabajadas = hora - horarios['entrada_salida']
             tipo = 'entrada'
             detalle ='temprana'
     return tipo, detalle, horas_trabajadas
@@ -228,59 +200,35 @@ def EntradaoSalida(marcaciones):
 
 
 
+#Funcion para uso de pruebas
+def prueba(data): 
 
-
-
-
-
-
-
-               
-
-def Capturar_Horario_Departamento(FK_horario):
-    horario_departamento = []
-    conexion = con.conexion
-    with conexion.cursor() as cursor:
-        cursor.execute(f"SELECT * FROM horarios WHERE id_horario = {FK_horario} ")
-        horario_departamento = cursor.fetchall()
-    conexion.close()
-    return horario_departamento
-
-
-def obtener_departamentos_FK():
-    departamentos_FK = []
-    conexion = con.conexion
-    with conexion.cursor() as cursor:
-        cursor.execute("SELECT FK_horarios FROM departamentos")
-        departamentos_FK = cursor.fetchall()
-    conexion.close()
-    return departamentos_FK
-
-
-
-
-
-
-def prueba(marcaciones): 
-
-    for marca in marcaciones:
-
+    for marca in data:
         hora = marca.timestamp.time()
+        tipo = []
 
         horario = datetime.strptime("06:45:00","%H:%M:%S").time()
         if horario >= hora  or horario <= hora  and hora  <= horario:
-            print("Entrada", hora)
+            tipo = 'entrada'
         else:
-            print("Salida", hora)
+            tipo = 'salida'
+    return tipo
 
+#Funcion que toma los datos de la marcacion en bruto, tantes de capturar mira si no son iguales y despues devuelve ese valor para que pase por la sgte funcion
 def Actualizar_Datos(id_dispositivo, marcacion):
     conexion = con.conexion
     with conexion.cursor() as cursor:
-        cursor.execute(f"SELECT marcacion FROM marcados WHERE FK_dispositivos = {id_dispositivo} ORDER BY  marcacion DESC LIMIT 1")
-        dispositivo = cursor.fetchone()['marcacion']
+        #cursor.execute(f"SELECT marcacion FROM marcados WHERE FK_dispositivos = 1 ORDER BY  marcacion DESC LIMIT 1")
+        #cursor.execute(f"SELECT 1 FROM DUMNY ")
+        ultima_marcacion = cursor.fetchone()['marcacion']
     conexion.close()
 
-    for marca in marcacion:
-        if marca.timestamp >= dispositivo:
-            EntradaoSalida()
+    # for marca in marcacion:
 
+    #     if marca.timestamp >= ultima_marcacion or ultima_marcacion is None:
+    #         tipo, _, _ = EntradaoSalida(marca)
+    #         Marcados(marca, id_dispositivo, tipo)
+    print(ultima_marcacion)
+
+
+Capturar_DatosZK(data)

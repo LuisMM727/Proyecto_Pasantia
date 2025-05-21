@@ -78,5 +78,8 @@ def generate_realistic_Attendance(num_employees=5, days=10, start_date=None):
 data = generate_realistic_Attendance(num_employees=5, days=365)
 
 # Imprimir los registros generados
-for record in data:
-    print(record)
+# i = 1
+# for record in data:
+#     print(i, record)
+
+#     i += 1
