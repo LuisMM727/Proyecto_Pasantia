@@ -2,10 +2,11 @@ from flask import Flask, render_template, request, redirect, session, url_for, f
 from modulos.conexionDB import conexion as con
 from werkzeug.security import check_password_hash
 from modulos.funciones import obtener_marcacion, Capturar_DatosZK, dispositivo_ZK
+from modulos.generate_zk_testdata import data
 app = Flask(__name__)
 app.secret_key = 'clave'
 
-
+#Pantalla login
 @app.route('/', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
@@ -29,7 +30,7 @@ def login():
 
     return render_template('login.html')
 
-
+#Pantalla index-Home
 @app.route('/index', methods=['GET', 'POST'])
 def index():
     if 'usuario' not in session:
@@ -44,7 +45,7 @@ def index():
             flash("Conectado al dispositivo")
 
         elif accion == 'actualizar_todo':
-            Capturar_DatosZK()
+            Capturar_DatosZK(data)
             flash("Todos los dispositivos actualizados correctamente.")
 
     return render_template("index.html")
@@ -56,7 +57,7 @@ def index():
 
 
 
-
+#Pantalla de marcacion
 @app.route('/marcacion')
 def marcacion():
     marcacion = obtener_marcacion()
@@ -66,6 +67,8 @@ def marcacion():
 
 
 
+
+#Pantalla logout
 @app.route('/logout')
 def logout():
     session.pop('usuario', None)
