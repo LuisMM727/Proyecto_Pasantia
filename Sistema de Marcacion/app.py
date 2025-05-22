@@ -2,7 +2,7 @@ from flask import Flask, render_template, request, redirect, session, url_for, f
 from modulos.conexionDB import conexion as con
 from werkzeug.security import check_password_hash
 from modulos.funciones import obtener_marcacion, Capturar_DatosZK, dispositivo_ZK
-#from modulos.generate_zk_testdata import data
+from modulos.generate_zk_testdata import data
 app = Flask(__name__)
 app.secret_key = 'clave'
 
@@ -45,7 +45,7 @@ def index():
             flash("Conectado al dispositivo")
 
         elif accion == 'actualizar_todo':
-            #Capturar_DatosZK(data)
+            Capturar_DatosZK(data)
             flash("Todos los dispositivos actualizados correctamente.")
 
     return render_template("index.html")
