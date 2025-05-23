@@ -166,8 +166,10 @@ def EntradaoSalida(marcacion):
     horarios_lista = obtener_horario(departamento['FK_horarios'])
     horarios = horarios_lista[0]
 
-    hora_marcacion = marcacion.timestamp.time()
     fecha_marcacion = marcacion.timestamp.date()
+    hora_marcacion = marcacion.timestamp  
+
+    # Construir los horarios del día como datetime
     entrada_manana = datetime.combine(fecha_marcacion, asegurar_time(horarios['entrada_manana']))
     tolerancia_manana = datetime.combine(fecha_marcacion, asegurar_time(horarios['tolerancia_manana']))
     salida_manana = datetime.combine(fecha_marcacion, asegurar_time(horarios['salida_manana']))
@@ -191,7 +193,7 @@ def EntradaoSalida(marcacion):
         tipo = 'entrada'
         detalle = 'tarde'
 
-    # Salida mañana (aceptar desde 10 min antes hasta 10 min después)
+    # Salida mañana
     if tipo == '':
         if salida_manana - timedelta(minutes=10) <= hora_marcacion <= salida_manana + timedelta(minutes=10):
             tipo = 'salida'
@@ -210,19 +212,20 @@ def EntradaoSalida(marcacion):
             tipo = 'entrada'
             detalle = 'tarde'
 
-    # Salida tarde (aceptar desde 10 min antes hasta 10 min después)
+    # Salida tarde
     if tipo == '':
         if salida_tarde - timedelta(minutes=10) <= hora_marcacion <= salida_tarde + timedelta(minutes=10):
             tipo = 'salida'
             detalle = 'None'
             horas_trabajadas = hora_marcacion - entrada_tarde
 
-    # Si no se determinó tipo, se marca como entrada irregular
+    # Entrada irregular
     if tipo == '':
         tipo = 'entrada'
         detalle = 'Irregular'
 
-    horas_decimales = horas_trabajadas.total_seconds() / 3600
+    # Convertir timedelta a horas decimales
+    horas_decimales = round(horas_trabajadas.total_seconds() / 3600, 1)
 
     return tipo, detalle, horas_decimales
 
