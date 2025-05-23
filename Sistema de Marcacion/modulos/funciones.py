@@ -50,7 +50,6 @@ def obtener_dispositivos():
 
 def obtener_dispositivos_Prueba():
     conexion = obtener_conexion()
-    #dispositivosPrueba = []
     with conexion.cursor() as cursor:
         cursor.execute("SELECT id_dispositivo FROM dispositivos WHERE id_dispositivo = 2")
         dispositivosPrueba = cursor.fetchone()
@@ -154,84 +153,82 @@ def dispositivo_ZK(ip, puerto):
 
 
 
+#Funcion para convertir un valor a time
+def asegurar_time(valor):
+    if isinstance(valor, timedelta):
+        return (datetime.min + valor).time()
+    return valor
+
 #Funcion para saber si la marcacion es de tipo Entrada o Salida y cuantas horas trabajo 
-def EntradaoSalida(marca):
-    empleado = obtener_empleado(marca.user_id)
+def EntradaoSalida(marcacion):
+    empleado = obtener_empleado(marcacion.user_id)
     departamento = obtener_departamento(empleado['FK_departamento'])
-    horarios = obtener_horario(departamento['FK_horarios'])
-    hora = marca.timestamp.time()
+    horarios_lista = obtener_horario(departamento['FK_horarios'])
+    horarios = horarios_lista[0]
 
-    def to_time(val):
-        # Convierte val a datetime.time, soporta string, timedelta, o time
-        if isinstance(val, time):
-            return val
-        elif isinstance(val, timedelta):
-            # Convertir timedelta a time asumiendo que es tiempo desde 00:00
-            total_seconds = val.total_seconds()
-            horas = int(total_seconds // 3600)
-            minutos = int((total_seconds % 3600) // 60)
-            segundos = int(total_seconds % 60)
-            return time(horas, minutos, segundos)
-        elif isinstance(val, str):
-            return datetime.strptime(val, "%H:%M:%S").time()
-        else:
-            raise ValueError(f"Tipo inesperado para convertir a time: {type(val)}")
+    hora_marcacion = marcacion.timestamp.time()
+    fecha_marcacion = marcacion.timestamp.date()
+    entrada_manana = datetime.combine(fecha_marcacion, asegurar_time(horarios['entrada_manana']))
+    tolerancia_manana = datetime.combine(fecha_marcacion, asegurar_time(horarios['tolerancia_manana']))
+    salida_manana = datetime.combine(fecha_marcacion, asegurar_time(horarios['salida_manana']))
 
-    def to_timedelta(val):
-        # Convierte string a timedelta o devuelve si ya es timedelta
-        if isinstance(val, timedelta):
-            return val
-        elif isinstance(val, str):
-            h, m, s = map(int, val.split(':'))
-            return timedelta(hours=h, minutes=m, seconds=s)
-        else:
-            raise ValueError(f"Tipo inesperado para convertir a timedelta: {type(val)}")
+    entrada_tarde = datetime.combine(fecha_marcacion, asegurar_time(horarios['entrada_tarde']))
+    tolerancia_tarde = datetime.combine(fecha_marcacion, asegurar_time(horarios['tolerancia_tarde']))
+    salida_tarde = datetime.combine(fecha_marcacion, asegurar_time(horarios['salida_tarde']))
 
-    entrada_manana = to_time(horarios[0]['entrada_manana'])
-    tolerancia_manana = to_timedelta(horarios[0]['tolerancia_manana'])
-    salida_manana = to_time(horarios[0]['salida_manana'])
+    tipo = ''
+    detalle = ''
+    horas_trabajadas = timedelta(0)
 
-    entrada_tarde = to_time(horarios[0]['entrada_tarde'])
-    tolerancia_tarde = to_timedelta(horarios[0]['tolerancia_tarde'])
-    salida_tarde = to_time(horarios[0]['salida_tarde'])
-
-    detalle = None
-    tipo = None
-    horas_trabajadas = None
-
-    limite_entrada_manana = (datetime.combine(datetime.today(), entrada_manana) + tolerancia_manana).time()
-
-    if entrada_manana <= hora <= limite_entrada_manana:
+    # Entrada mañana
+    if entrada_manana <= hora_marcacion <= tolerancia_manana:
         tipo = 'entrada'
-    elif hora > limite_entrada_manana:
+        detalle = 'None'
+    elif hora_marcacion < entrada_manana:
+        tipo = 'entrada'
+        detalle = 'temprano'
+    elif tolerancia_manana < hora_marcacion < salida_manana:
         tipo = 'entrada'
         detalle = 'tarde'
 
-    if hora <= salida_manana:
-        horas_trabajadas = datetime.combine(datetime.today(), hora) - datetime.combine(datetime.today(), entrada_manana)
-        tipo = 'salida'
-    elif hora > salida_manana:
-        horas_trabajadas = datetime.combine(datetime.today(), hora) - datetime.combine(datetime.today(), entrada_manana)
-        tipo = 'salida'
-        detalle = 'temprana'
+    # Salida mañana (aceptar desde 10 min antes hasta 10 min después)
+    if tipo == '':
+        if salida_manana - timedelta(minutes=10) <= hora_marcacion <= salida_manana + timedelta(minutes=10):
+            tipo = 'salida'
+            detalle = 'None'
+            horas_trabajadas = hora_marcacion - entrada_manana
 
-    limite_entrada_tarde = (datetime.combine(datetime.today(), entrada_tarde) + tolerancia_tarde).time()
+    # Entrada tarde
+    if tipo == '':
+        if entrada_tarde <= hora_marcacion <= tolerancia_tarde:
+            tipo = 'entrada'
+            detalle = 'None'
+        elif hora_marcacion < entrada_tarde:
+            tipo = 'entrada'
+            detalle = 'temprano'
+        elif tolerancia_tarde < hora_marcacion < salida_tarde:
+            tipo = 'entrada'
+            detalle = 'tarde'
 
-    if entrada_tarde <= hora <= limite_entrada_tarde:
+    # Salida tarde (aceptar desde 10 min antes hasta 10 min después)
+    if tipo == '':
+        if salida_tarde - timedelta(minutes=10) <= hora_marcacion <= salida_tarde + timedelta(minutes=10):
+            tipo = 'salida'
+            detalle = 'None'
+            horas_trabajadas = hora_marcacion - entrada_tarde
+
+    # Si no se determinó tipo, se marca como entrada irregular
+    if tipo == '':
         tipo = 'entrada'
-    elif hora > limite_entrada_tarde:
-        tipo = 'entrada'
-        detalle = 'tarde'
+        detalle = 'Irregular'
 
-    if hora <= salida_tarde:
-        horas_trabajadas = datetime.combine(datetime.today(), hora) - datetime.combine(datetime.today(), entrada_tarde)
-        tipo = 'salida'
-    elif hora > salida_tarde:
-        horas_trabajadas = datetime.combine(datetime.today(), hora) - datetime.combine(datetime.today(), entrada_tarde)
-        tipo = 'salida'
-        detalle = 'temprana'
+    horas_decimales = horas_trabajadas.total_seconds() / 3600
 
-    return tipo, detalle, horas_trabajadas
+    return tipo, detalle, horas_decimales
+
+
+
+
 
 
 
@@ -251,8 +248,9 @@ def Actualizar_Datos(id_dispositivo, marcacion):
 
     for marca in marcacion:
         if ultima_marcacion is None or marca.timestamp >= ultima_marcacion['marcacion']:
-            tipo, _, _ = EntradaoSalida(marca)
-            Marcados(marca, id_dispositivo, tipo)
+            tipo, detalle, horas_trabajadas = EntradaoSalida(marca)
+            #Marcados(marca, id_dispositivo, tipo)
+            print(f"tipo:{tipo}   detalle: {detalle}   horas trabajadas: {horas_trabajadas}")
 
 Capturar_DatosZK(data)
 #EntradaoSalida(Actualizar_Datos_Prueba)

@@ -1,79 +1,71 @@
-#Funcion para saber si la marcacion es de tipo Entrada o Salida y cuantas horas trabajo 
-def EntradaoSalida(marca):
-    print("gfvgcffc")
-    empleado = obtener_empleado(marca.user_id)
+def EntradaoSalida(marcacion):
+    empleado = obtener_empleado(marcacion.user_id)
     departamento = obtener_departamento(empleado['FK_departamento'])
-    horarios = obtener_horario(departamento['FK_horarios'])
+    
+    horarios_lista = obtener_horario(departamento['FK_horarios'])
+    if not horarios_lista:
+        raise ValueError("No se encontró un horario para el departamento.")
+    horarios = horarios_lista[0]  
 
+    hora_marcacion = marcacion.timestamp.time()
+    hora_dt = datetime.combine(datetime.today(), hora_marcacion)
 
-    horario = horarios[0]
-    hora = marca.timestamp.time()
+    entrada_mañana = datetime.combine(datetime.today(), asegurar_time(horarios['entrada_manana']))
+    tolerancia_mañana = datetime.combine(datetime.today(), asegurar_time(horarios['tolerancia_manana']))
+    salida_manana = datetime.combine(datetime.today(), asegurar_time(horarios['salida_manana']))
 
-    def to_time(val):
-        if isinstance(val, time):
-            return val
-        elif isinstance(val, timedelta):
-            total_seconds = val.total_seconds()
-            horas = int(total_seconds // 3600)
-            minutos = int((total_seconds % 3600) // 60)
-            segundos = int(total_seconds % 60)
-            return time(horas, minutos, segundos)
-        elif isinstance(val, str):
-            return datetime.strptime(val, "%H:%M:%S").time()
-        else:
-            raise ValueError(f"Tipo inesperado para convertir a time: {type(val)}")
+    entrada_tarde = datetime.combine(datetime.today(), asegurar_time(horarios['entrada_tarde']))
+    tolerancia_tarde = datetime.combine(datetime.today(), asegurar_time(horarios['tolerancia_tarde']))
+    salida_tarde = datetime.combine(datetime.today(), asegurar_time(horarios['salida_tarde']))
 
-    def to_timedelta(val):
-        if isinstance(val, timedelta):
-            return val
-        elif isinstance(val, str):
-            h, m, s = map(int, val.split(':'))
-            return timedelta(hours=h, minutes=m, seconds=s)
-        else:
-            raise ValueError(f"Tipo inesperado para convertir a timedelta: {type(val)}")
+    tipo = ''
+    detalle = ''
+    horas_trabajadas = timedelta(0)
 
-    # Convertimos los datos del horario
-    entrada_manana = to_time(horario['entrada_manana'])
-    salida_manana = to_time(horario['salida_manana'])
-    entrada_tarde = to_time(horario['entrada_tarde'])
-    salida_tarde = to_time(horario['salida_tarde'])
-    tolerancia_manana = to_timedelta(horario.get('tolerancia_manana', timedelta()))
-    tolerancia_tarde = to_timedelta(horario.get('tolerancia_tarde', timedelta()))
-
-    ahora = datetime.combine(datetime.today(), hora)
-    entrada_m_dt = datetime.combine(datetime.today(), entrada_manana)
-    salida_m_dt = datetime.combine(datetime.today(), salida_manana)
-    entrada_t_dt = datetime.combine(datetime.today(), entrada_tarde)
-    salida_t_dt = datetime.combine(datetime.today(), salida_tarde)
-    print(entrada_m_dt)
-    print(salida_m_dt)
-    print(entrada_t_dt)
-    print(salida_t_dt)
-    print(tolerancia_manana)
-    print(tolerancia_tarde)
-    print(ahora)
-    print("--------------------------------------------------")
-    tipo = None
-    detalle = None
-    horas_trabajadas = None
-
-    # Rango entrada mañana
-    if entrada_m_dt <= ahora <= entrada_m_dt:
+    # Evaluar entrada mañana
+    if entrada_mañana <= hora_dt <= tolerancia_mañana:
         tipo = 'entrada'
-    # Rango salida mañana
-    elif salida_m_dt - timedelta(minutes=30) <= ahora <= salida_m_dt + timedelta(minutes=30):
-        tipo = 'salida'
-        horas_trabajadas = salida_m_dt - entrada_m_dt
-    # Rango entrada tarde
-    elif entrada_t_dt <= ahora <= entrada_t_dt + tolerancia_tarde:
+        detalle = 'None'
+    elif hora_dt < entrada_mañana:
         tipo = 'entrada'
-    # Rango salida tarde
-    elif salida_t_dt - timedelta(minutes=30) <= ahora <= salida_t_dt + timedelta(minutes=30):
-        tipo = 'salida'
-        horas_trabajadas = salida_t_dt - entrada_t_dt
-    else:
-        # Fuera de horario conocido
+        detalle = 'temprano'
+    elif tolerancia_mañana < hora_dt:
         tipo = 'entrada'
-        detalle = 'fuera de horario'
+        detalle = 'tarde'
 
-    return tipo, detalle, horas_trabajadas
+    # Evaluar salida mañana
+    if tipo == '':
+        if hora_dt <= salida_manana or hora_dt >= salida_manana:
+            tipo = 'salida'
+            detalle = 'None'
+            horas_trabajadas = hora_dt - entrada_mañana
+
+
+    # Evaluar entrada tarde
+    if tipo == '':
+        if entrada_tarde <= hora_dt <= tolerancia_tarde:
+            tipo = 'entrada'
+            detalle = 'None'
+        elif hora_dt < entrada_tarde:
+            tipo = 'entrada'
+            detalle = 'temprano'
+        elif tolerancia_tarde < hora_dt:
+            tipo = 'entrada'
+            detalle = 'tarde'
+
+    # Evaluar salida tarde
+    if tipo == '':
+        if hora_dt <= salida_tarde or hora_dt >= salida_tarde:
+            tipo = 'salida'
+            detalle = 'None'
+            horas_trabajadas = hora_dt - entrada_tarde
+
+
+    # Si no se determinó tipo, se marca como entrada irregular
+    if tipo == '':
+        tipo = 'entrada'
+        detalle = 'Irregular'
+
+    horas_decimales = horas_trabajadas.total_seconds() / 3600
+
+    return tipo, detalle, horas_decimales
