@@ -43,16 +43,14 @@
                     <th>ID</th>
                     <th>Nombre</th>
                     <th>Activo</th>
-                    <th>Departamento</th>
                 </tr>
             </thead>
             <tbody>
-                {% for empleado in empleados %}
+                {% for usuario in usuarios %}
                 <tr>
-                    <td>{{empleado.id_empleado}}</td>
-                    <td>{{empleado.nombre_empleado}}</td>
-                    <td>{{empleado.activo}}</td>
-                    <td>{{empleado.nombre_departamento}}</td>
+                    <td>{{usuario.id_usuario}}</td>
+                    <td>{{usuario.nombre_usuario}}</td>
+                    <td>{{usuario.activo}}</td>
                 </tr>
                 {% endfor %}
             </tbody> 

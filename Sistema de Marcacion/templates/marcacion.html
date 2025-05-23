@@ -25,7 +25,12 @@
         <h4 class="text-white text-center py-3">Panel</h4>
         <a href="{{ url_for('index') }}">Inicio</a>
         <a href="{{ url_for('marcacion') }}">Marcacion</a>
-        <a href="#">Dispositivos</a>
+        <a href="{{ url_for('dispositivos') }}">Dispositivos</a>
+        <a href="{{ url_for('empleados') }}">Empleados</a>
+        <a href="{{ url_for('usuarios') }}">Usuarios</a>
+        <a href="#">Reportes</a>
+        <a href="{{ url_for('departamentos') }}">Departamentos</a>
+        <a href="{{ url_for('horarios') }}">Horarios</a>
         <a href="{{ url_for('logout') }}">Cerrar sesión</a>
     </div>
 
@@ -36,18 +41,21 @@
             <thead>
                 <tr>
                     <th>ID</th>
-                    <th>ID del Marcador</th>
                     <th>Marcacion</th>
+                    <th>Tipo</th>
+                    <th>Empleado</th>
+                    <th>Dispositivo</th>
+
                 </tr>
             </thead>
             <tbody>
                 {% for marca in marcacion %}
                 <tr>
-                    <td>{{marca.id_marcado}}</td>
+                    <td>{{marca.id_marcacion}}</td>
                     <td>{{marca.marcacion}}</td>
                     <td>{{marca.tipo}}</td>
-                    <td>{{marca.FK_empleado}}</td>
-                    <td>{{marca.FK_dispositivos}}</td>
+                    <td>{{marca.nombre_empleado}}</td>
+                    <td>{{marca.nombre_dispositivo}}</td>
                 </tr>
                 {% endfor %}
             </tbody> 
