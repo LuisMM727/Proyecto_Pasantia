@@ -1,26 +1,66 @@
 body {
     display: flex;
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background-color: #f4f6f8;
 }
+
 .sidebar {
     width: 250px;
     height: 100vh;
     background-color: #343a40;
+    position: fixed;
+    overflow-y: auto;
 }
+
 .sidebar a {
     color: #fff;
     padding: 15px;
     display: block;
     text-decoration: none;
+    transition: background-color 0.3s ease;
 }
+
 .sidebar a:hover {
     background-color: #495057;
 }
+
 .main-content {
     flex: 1;
-    padding: 20px;
+    margin-left: 250px; /* Para dejar espacio al sidebar fijo */
+    padding: 20px 30px;
+    background-color: #fff;
+    min-height: 100vh;
 }
+
 .topbar {
     background-color: #f8f9fa;
     padding: 15px;
     border-bottom: 1px solid #dee2e6;
+}
+
+/* Tabla ajustada para ocupar todo el ancho */
+table {
+    width: 100% !important;
+}
+
+/* Botones DataTables más espaciosos */
+.dt-buttons .btn {
+    margin-right: 5px;
+}
+
+/* Botón para agregar empleado */
+button {
+    background-color: #007bff;
+    border: none;
+    color: white;
+    padding: 8px 16px;
+    font-size: 14px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+button:hover {
+    background-color: #0056b3;
 }

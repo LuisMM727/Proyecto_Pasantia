@@ -29,11 +29,10 @@
             <span>Bienvenido, {{ session['usuario'] }}</span>
         </div>
         <div class="topbar d-flex justify-content-between">
-            <h2>Editar Empleado</h2>
+            <h2>Agregar Empleado</h2>
             <form method="post">
                 ID: <input type="number" name="id" required><br>
                 Nombre: <input type="text" name="nombre" required><br>
-                Activo: <input type="checkbox" name="activo" required><br>
                 Departamento Asignado <input type="number" name="departamento" required><br>
                 <input type="submit" value="Guardar">
             </form>

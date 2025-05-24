@@ -36,6 +36,7 @@
 
     <!-- Contenido principal -->
     <div class="main-content">
+        <a href="{{ url_for('agregar_empleado') }}"><button>Agregar Empleado</button></a>
         <!-- Topbar -->
         <table id="example" class="table table-striped table-bordered">
             <thead>
@@ -44,6 +45,7 @@
                     <th>Nombre</th>
                     <th>Activo</th>
                     <th>Departamento</th>
+                    <th>Accion</th>
                 </tr>
             </thead>
             <tbody>
@@ -53,6 +55,7 @@
                     <td>{{empleado.nombre_empleado}}</td>
                     <td>{{empleado.activo}}</td>
                     <td>{{empleado.nombre_departamento}}</td>
+                    <td><a href="{{ url_for('editar_empleado', id=empleado.id_empleado) }}"><button>Editar</button></a></td>
                 </tr>
                 {% endfor %}
             </tbody> 

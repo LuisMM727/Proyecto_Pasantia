@@ -36,6 +36,20 @@ def Empleados(empleado, departamento_unico):
     conexion.commit()
 
     cursor.close()
+    conexion.close()
+
+
+#Funcion para Insertar empleados a la BD
+def empleados_formulario(id, nombre, departamento):
+    activo = True
+    conexion = obtener_conexion()
+    cursor = conexion.cursor() 
+
+    consulta = "INSERT INTO empleado(id_empleado, nombre_empleado, activo, FK_departamento) VALUES (%s, %s, %s, %s);"
+    cursor.execute(consulta, (id, nombre, activo, departamento ))
+    conexion.commit()
+
+    cursor.close()
     conexion.close()   	
 
 #Funcion para Insertar marcaciones a la BD
@@ -149,6 +163,21 @@ def obtener_empleado(id):
     conexion.close()
     return empleados
 
+def obtener_empleado_Formulario(id):
+    conexion = obtener_conexion()
+    with conexion.cursor() as cursor:
+        cursor.execute(f"SELECT * FROM empleado WHERE id_empleado = {id}")
+        empleados = cursor.fetchone()
+    conexion.close()
+    return empleados
+
+def actualizar_empleado(id, nombre, activo, departamento):
+    conexion = obtener_conexion()
+    with conexion.cursor() as cursor:
+        cursor.execute("""UPDATE empleado SET nombre_empleado = %s, activo = %s, FK_departamento = %s WHERE id_empleado = %s""", (nombre, activo, departamento, id))
+    conexion.commit()
+    conexion.close()
+
 def obtener_empleados():
     empleados = []
     conexion = obtener_conexion()
@@ -246,6 +275,7 @@ def asegurar_time(valor):
     return valor
 
 #Funcion para saber si la marcacion es de tipo Entrada o Salida y cuantas horas trabajo y que en condiciones llego al trabajo
+
 def EntradaoSalida(marcacion):
     empleado = obtener_empleado(marcacion.user_id)
     departamento = obtener_departamento(empleado['FK_departamento'])
@@ -253,9 +283,8 @@ def EntradaoSalida(marcacion):
     horarios = horarios_lista[0]
 
     fecha_marcacion = marcacion.timestamp.date()
-    hora_marcacion = marcacion.timestamp  
+    hora_marcacion = marcacion.timestamp
 
-    # Convierte los horarios en valor datetime
     entrada_manana = datetime.combine(fecha_marcacion, asegurar_time(horarios['entrada_manana']))
     tolerancia_manana = datetime.combine(fecha_marcacion, asegurar_time(horarios['tolerancia_manana']))
     salida_manana = datetime.combine(fecha_marcacion, asegurar_time(horarios['salida_manana']))
@@ -271,10 +300,7 @@ def EntradaoSalida(marcacion):
     # Entrada mañana
     if entrada_manana <= hora_marcacion <= tolerancia_manana:
         tipo = 'entrada'
-        detalle = 'None'
-    elif hora_marcacion < entrada_manana:
-        tipo = 'entrada'
-        detalle = 'temprano'
+        detalle = 'a tiempo'
     elif tolerancia_manana < hora_marcacion < salida_manana:
         tipo = 'entrada'
         detalle = 'tarde'
@@ -283,17 +309,14 @@ def EntradaoSalida(marcacion):
     if tipo == '':
         if salida_manana - timedelta(minutes=10) <= hora_marcacion <= salida_manana + timedelta(minutes=10):
             tipo = 'salida'
-            detalle = 'None'
+            detalle = 'a tiempo'
             horas_trabajadas = hora_marcacion - entrada_manana
 
     # Entrada tarde
     if tipo == '':
         if entrada_tarde <= hora_marcacion <= tolerancia_tarde:
             tipo = 'entrada'
-            detalle = 'None'
-        elif hora_marcacion < entrada_tarde:
-            tipo = 'entrada'
-            detalle = 'temprano'
+            detalle = 'a tiempo'
         elif tolerancia_tarde < hora_marcacion < salida_tarde:
             tipo = 'entrada'
             detalle = 'tarde'
@@ -302,18 +325,19 @@ def EntradaoSalida(marcacion):
     if tipo == '':
         if salida_tarde - timedelta(minutes=10) <= hora_marcacion <= salida_tarde + timedelta(minutes=10):
             tipo = 'salida'
-            detalle = 'None'
+            detalle = 'a tiempo'
             horas_trabajadas = hora_marcacion - entrada_tarde
 
     # Entrada irregular
     if tipo == '':
         tipo = 'entrada'
-        detalle = 'Irregular'
+        detalle = 'irregular'
 
-    # Convierte timedelta a horas decimales
     horas_decimales = round(horas_trabajadas.total_seconds() / 3600, 1)
 
     return tipo, detalle, horas_decimales
+
+
 
 
 
