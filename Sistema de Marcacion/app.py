@@ -10,7 +10,7 @@ from modulos.funciones import (
 from modulos.generate_zk_testdata import data
 
 app = Flask(__name__)
-app.secret_key = 'clave_super_secreta'  # Cambia esta clave por algo seguro en producción
+app.secret_key = 'clave_super_secreta'
 
 # Pantalla login
 @app.route('/', methods=['GET', 'POST'])
@@ -143,6 +143,37 @@ def usuarios():
 
     usuarios = obtener_usuarios()
     return render_template("usuarios.html", usuarios=usuarios)
+
+#Pantalla de Reportes
+@app.route('/reportes')
+def reportes():
+    if 'usuario' not in session:
+        return redirect(url_for('login'))
+
+    return render_template("reportes.html")
+
+#Pantalla de Reportes de empleados
+@app.route('/reportes_empleados')
+def reportes_empleados():
+    if 'usuario' not in session:
+        return redirect(url_for('login'))
+
+    return render_template("reportes_empleados.html")
+
+#Pantalla de Reportes de Marcaciones
+@app.route('/reportes_marcacion')
+def reportes_marcacion():
+    if 'usuario' not in session:
+        return redirect(url_for('login'))
+
+    return render_template("reportes_marcacion.html")
+
+
+
+
+
+
+
 
 # Pantalla logout
 @app.route('/logout')

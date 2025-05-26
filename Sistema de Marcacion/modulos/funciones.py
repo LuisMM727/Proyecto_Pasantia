@@ -1,10 +1,10 @@
 
-from modulos.conexionDB import obtener_conexion
+from conexionDB import obtener_conexion
 from io import BytesIO
 from reportlab.pdfgen import canvas
 from zk import ZK
 from datetime import  datetime, timedelta, time
-from modulos.generate_zk_testdata import data
+from generate_zk_testdata import data
 
 
 #Funcion para insertar usuarios
@@ -53,12 +53,12 @@ def empleados_formulario(id, nombre, departamento):
     conexion.close()   	
 
 #Funcion para Insertar marcaciones a la BD
-def Marcados(marca, nombre_ZK, tipo):
+def Marcados(marca, nombre_ZK, tipo, detalle, horas_trabajadas):
     conexion = obtener_conexion()
     cursor = conexion.cursor() 
 
-    consulta = "INSERT INTO marcados(marcacion, tipo, FK_empleado, FK_dispositivos) VALUES (%s, %s, %s, %s);"
-    cursor.execute(consulta, (marca.timestamp, tipo, marca.user_id, nombre_ZK))
+    consulta = "INSERT INTO marcados(marcacion, tipo, detalle, horas_trabajadas, FK_empleado, FK_dispositivos) VALUES (%s, %s, %s, %s, %s, %s);"
+    cursor.execute(consulta, (marca.timestamp, tipo, detalle, horas_trabajadas, marca.user_id, nombre_ZK))
     conexion.commit()
 
     cursor.close()
@@ -249,10 +249,10 @@ def Capturar_DatosZK(data):
 
         except Exception as e:
             print(f"Error: {e}")
-            dipositivoPrueba = obtener_dispositivos_Prueba()
-            marcaciones = data
-            nombre_ZK = dipositivoPrueba['id_dispositivo']
-            Actualizar_Datos(nombre_ZK,marcaciones)
+            #dipositivoPrueba = obtener_dispositivos_Prueba()
+            #generador_marcaciones = data
+            #nombre_ZK = dipositivoPrueba['id_dispositivo']
+            #Actualizar_Datos(nombre_ZK,generador_marcaciones)
 
 #Funcion que obtiene los datos del formulario de dipositivos para hacer la conexion y tomar los datos
 def dispositivo_ZK(ip, puerto):
@@ -296,46 +296,51 @@ def EntradaoSalida(marcacion):
     tipo = ''
     detalle = ''
     horas_trabajadas = timedelta(0)
+    horas_trabajadas_decimales = None
 
     # Entrada mañana
-    if entrada_manana <= hora_marcacion <= tolerancia_manana:
+    if entrada_manana <= hora_marcacion and hora_marcacion <= tolerancia_manana:
         tipo = 'entrada'
         detalle = 'a tiempo'
-    elif tolerancia_manana < hora_marcacion < salida_manana:
+        horas_trabajadas_decimales = None
+        
+    elif tolerancia_manana < hora_marcacion and hora_marcacion < salida_manana  and hora_marcacion > entrada_manana:
         tipo = 'entrada'
         detalle = 'tarde'
+        horas_trabajadas_decimales = None
 
     # Salida mañana
     if tipo == '':
-        if salida_manana - timedelta(minutes=10) <= hora_marcacion <= salida_manana + timedelta(minutes=10):
+        if salida_manana - timedelta(minutes=10) <= hora_marcacion:
             tipo = 'salida'
-            detalle = 'a tiempo'
+            detalle = None
             horas_trabajadas = hora_marcacion - entrada_manana
+
+            horas_trabajadas_decimales = timedelta( hours=round(horas_trabajadas.total_seconds() / 3600, 1))
+
+            
 
     # Entrada tarde
     if tipo == '':
-        if entrada_tarde <= hora_marcacion <= tolerancia_tarde:
+        if entrada_tarde <= hora_marcacion and hora_marcacion <= tolerancia_tarde:
             tipo = 'entrada'
             detalle = 'a tiempo'
-        elif tolerancia_tarde < hora_marcacion < salida_tarde:
+            horas_trabajadas_decimales = None
+        elif tolerancia_tarde < hora_marcacion and hora_marcacion < salida_tarde and hora_marcacion > entrada_tarde:
             tipo = 'entrada'
             detalle = 'tarde'
+            horas_trabajadas_decimales = None
 
     # Salida tarde
     if tipo == '':
-        if salida_tarde - timedelta(minutes=10) <= hora_marcacion <= salida_tarde + timedelta(minutes=10):
+        if salida_tarde - timedelta(minutes=10) <= hora_marcacion:
             tipo = 'salida'
-            detalle = 'a tiempo'
+            detalle = None
             horas_trabajadas = hora_marcacion - entrada_tarde
+            horas_trabajadas_decimales = timedelta( hours=round(horas_trabajadas.total_seconds() / 3600, 1))
 
-    # Entrada irregular
-    if tipo == '':
-        tipo = 'entrada'
-        detalle = 'irregular'
 
-    horas_decimales = round(horas_trabajadas.total_seconds() / 3600, 1)
-
-    return tipo, detalle, horas_decimales
+    return tipo, detalle, horas_trabajadas_decimales
 
 
 
@@ -345,7 +350,7 @@ def EntradaoSalida(marcacion):
 
 
 
-#Funcion que toma los datos de la marcacion en bruto, tantes de capturar mira si no son iguales y despues devuelve ese valor para que pase por la sgte funcion
+#Funcion que toma los datos de la marcacion en bruto, antes de capturar mira si no son iguales y despues devuelve ese valor para que pase por la sgte funcion
 def Actualizar_Datos(id_dispositivo, marcacion):
     conexion = obtener_conexion()
     try:
@@ -361,17 +366,16 @@ def Actualizar_Datos(id_dispositivo, marcacion):
 
     for marca in marcacion:
         if ultima_marcacion is None or marca.timestamp >= ultima_marcacion['marcacion']:
-            tipo, _, _ = EntradaoSalida(marca)
-            Marcados(marca, id_dispositivo, tipo)
-            #print(marca.timestamp)
-            #print(f"tipo:{tipo}   detalle: {detalle}   horas trabajadas: {horas_trabajadas}")
-
-def Actualizar_Datos_Empleados(empleados):
+            tipo, detalle, horas_trabajadas = EntradaoSalida(marca)
+            Marcados(marca, id_dispositivo, tipo, detalle, horas_trabajadas)
+            #print(f"marcacion: {marca.timestamp}, Tipo: {tipo}, Detalle: {detalle}, hora trabajadas: {horas_trabajadas}")
+#Arreglar
+#Funcion que toma los datos de los empleados en bruto, antes de enviarlo a la BD mira si no es un empleado que ya existe en la tabla en la BD
+def Actualizar_Datos_Empleados(empleados, id_dispositivo):
     conexion = obtener_conexion()
     try:
         with conexion.cursor() as cursor:
-            cursor.execute(
-                "SELECT id_empleado FROM empleado WHERE id_empleado = %s ORDER BY id_empleado DESC LIMIT 1",(empleados.user_id,))
+            cursor.execute("SELECT id_empleados FROM empleados WHERE  = %s ORDER BY marcacion DESC LIMIT 1",(empleados.user_id,))
             ultimo_empleado = cursor.fetchone()
         conexion.commit()
     finally:
@@ -382,3 +386,4 @@ def Actualizar_Datos_Empleados(empleados):
             Empleados(empleado,1)
 
 
+Capturar_DatosZK(data)
