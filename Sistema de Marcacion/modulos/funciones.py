@@ -1,6 +1,5 @@
 
 from conexionDB import obtener_conexion
-from io import BytesIO
 from reportlab.pdfgen import canvas
 from zk import ZK
 from datetime import  datetime, timedelta, time
@@ -23,6 +22,7 @@ def departamento():
         departamentos_unico = cursor.fetchone()
     conexion.close()
     return departamentos_unico
+
 
 
 #Funcion para Insertar empleados a la BD
@@ -211,48 +211,29 @@ def obtener_marcacion():
     obtener_conexion().close()
     return marcacion
 
-#Funcion para convertir html a PDF
-def generate_pdf_file(usuarios):
-
-    buffer = BytesIO()
-    p = canvas.Canvas(buffer)
-    p.drawString(100, 750, "reporte")
-    y = 700
-
-    for book in usuarios:
-        p.drawString(100, y, f"usuarios: {book}")
-
-        y -= 60
- 
-    p.showPage()
-    p.save()
- 
-    buffer.seek(0)
-    return buffer
-
-
+#Funcion para captuar los datos de todos los dispositivos uno a uno
 def Capturar_DatosZK(data):
-        try:
-            dispositivos = obtener_dispositivos()
-            for dispositivo in dispositivos:
-                zk = ZK(dispositivo['IP_dispositivo'], port=dispositivo['puerto'], timeout=5)
+        # try:
+        #     dispositivos = obtener_dispositivos()
+        #     for dispositivo in dispositivos:
+        #         zk = ZK(dispositivo['IP_dispositivo'], port=dispositivo['puerto'], timeout=5)
 
-                conn = zk.connect()
-                conn.disable_device()
-                empleados = conn.get_users()
-                marcaciones = conn.get_attendance()
-                conn.enable_device()
-                conn.disconnect()
-                Actualizar_Datos_Empleados(empleados)
-                nombre_ZK = dispositivo['id_dispositivo']
-                Actualizar_Datos(nombre_ZK, marcaciones)
+        #         conn = zk.connect()
+        #         conn.disable_device()
+        #         empleados = conn.get_users()
+        #         marcaciones = conn.get_attendance()
+        #         conn.enable_device()
+        #         conn.disconnect()
+        #         Actualizar_Datos_Empleados(empleados)
+        #         nombre_ZK = dispositivo['id_dispositivo']
+        #         Actualizar_Datos(nombre_ZK, marcaciones)
 
-        except Exception as e:
-            print(f"Error: {e}")
-            #dipositivoPrueba = obtener_dispositivos_Prueba()
-            #generador_marcaciones = data
-            #nombre_ZK = dipositivoPrueba['id_dispositivo']
-            #Actualizar_Datos(nombre_ZK,generador_marcaciones)
+        # except Exception as e:
+        #     print(f"Error: {e}")
+            dipositivoPrueba = obtener_dispositivos_Prueba()
+            generador_marcaciones = data
+            nombre_ZK = dipositivoPrueba['id_dispositivo']
+            Actualizar_Datos(nombre_ZK,generador_marcaciones)
 
 #Funcion que obtiene los datos del formulario de dipositivos para hacer la conexion y tomar los datos
 def dispositivo_ZK(ip, puerto):
@@ -298,47 +279,35 @@ def EntradaoSalida(marcacion):
     horas_trabajadas = timedelta(0)
     horas_trabajadas_decimales = None
 
+    # Salida mañana (verificar antes de entrada tarde para evitar conflictos)
+    if salida_manana - timedelta(minutes=10) <= hora_marcacion < entrada_tarde:
+        tipo = 'salida'
+        detalle = None
+        horas_trabajadas = hora_marcacion - entrada_manana 
+        horas_trabajadas_decimales = timedelta(hours=(horas_trabajadas.total_seconds() / 3600))
+
     # Entrada mañana
-    if entrada_manana <= hora_marcacion and hora_marcacion <= tolerancia_manana:
+    elif entrada_manana <= hora_marcacion <= tolerancia_manana:
         tipo = 'entrada'
         detalle = 'a tiempo'
-        horas_trabajadas_decimales = None
-        
-    elif tolerancia_manana < hora_marcacion and hora_marcacion < salida_manana  and hora_marcacion > entrada_manana:
+    elif tolerancia_manana < hora_marcacion < salida_manana:
         tipo = 'entrada'
         detalle = 'tarde'
-        horas_trabajadas_decimales = None
 
-    # Salida mañana
-    if tipo == '':
-        if salida_manana - timedelta(minutes=10) <= hora_marcacion:
-            tipo = 'salida'
-            detalle = None
-            horas_trabajadas = hora_marcacion - entrada_manana
-
-            horas_trabajadas_decimales = timedelta( hours=round(horas_trabajadas.total_seconds() / 3600, 1))
-
-            
+    # Salida tarde ( verifica antes que cualquier otra entrada por la tarde)
+    elif salida_tarde - timedelta(minutes=10) <= hora_marcacion:
+        tipo = 'salida'
+        detalle = None
+        horas_trabajadas = hora_marcacion - entrada_tarde
+        horas_trabajadas_decimales = timedelta(hours=(horas_trabajadas.total_seconds() / 3600))
 
     # Entrada tarde
-    if tipo == '':
-        if entrada_tarde <= hora_marcacion and hora_marcacion <= tolerancia_tarde:
-            tipo = 'entrada'
-            detalle = 'a tiempo'
-            horas_trabajadas_decimales = None
-        elif tolerancia_tarde < hora_marcacion and hora_marcacion < salida_tarde and hora_marcacion > entrada_tarde:
-            tipo = 'entrada'
-            detalle = 'tarde'
-            horas_trabajadas_decimales = None
-
-    # Salida tarde
-    if tipo == '':
-        if salida_tarde - timedelta(minutes=10) <= hora_marcacion:
-            tipo = 'salida'
-            detalle = None
-            horas_trabajadas = hora_marcacion - entrada_tarde
-            horas_trabajadas_decimales = timedelta( hours=round(horas_trabajadas.total_seconds() / 3600, 1))
-
+    elif entrada_tarde <= hora_marcacion <= tolerancia_tarde:
+        tipo = 'entrada'
+        detalle = 'a tiempo'
+    elif tolerancia_tarde < hora_marcacion < salida_tarde:
+        tipo = 'entrada'
+        detalle = 'tarde'
 
     return tipo, detalle, horas_trabajadas_decimales
 
@@ -356,9 +325,7 @@ def Actualizar_Datos(id_dispositivo, marcacion):
     try:
         with conexion.cursor() as cursor:
             cursor.execute(
-                "SELECT marcacion FROM marcados WHERE FK_dispositivos = %s ORDER BY marcacion DESC LIMIT 1",
-                (id_dispositivo,)
-            )
+                "SELECT marcacion FROM marcados WHERE FK_dispositivos = %s ORDER BY marcacion DESC LIMIT 1",(id_dispositivo,))
             ultima_marcacion = cursor.fetchone()
         conexion.commit()
     finally:
@@ -368,7 +335,7 @@ def Actualizar_Datos(id_dispositivo, marcacion):
         if ultima_marcacion is None or marca.timestamp >= ultima_marcacion['marcacion']:
             tipo, detalle, horas_trabajadas = EntradaoSalida(marca)
             Marcados(marca, id_dispositivo, tipo, detalle, horas_trabajadas)
-            #print(f"marcacion: {marca.timestamp}, Tipo: {tipo}, Detalle: {detalle}, hora trabajadas: {horas_trabajadas}")
+            print(f"marcacion: {marca.timestamp}, Tipo: {tipo}, Detalle: {detalle}, hora trabajadas: {horas_trabajadas}")
 #Arreglar
 #Funcion que toma los datos de los empleados en bruto, antes de enviarlo a la BD mira si no es un empleado que ya existe en la tabla en la BD
 def Actualizar_Datos_Empleados(empleados, id_dispositivo):
