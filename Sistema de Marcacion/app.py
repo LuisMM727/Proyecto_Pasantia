@@ -50,8 +50,8 @@ def index():
             flash("Conectado al dispositivo", 'success')
 
         elif accion == 'actualizar_todo':
-            Capturar_DatosZK(data)
-            flash("Todos los dispositivos actualizados correctamente.", 'success')
+            Capturar_DatosZK()
+            #flash("Todos los dispositivos actualizados correctamente.", 'success')
 
     return render_template("index.html")
 
