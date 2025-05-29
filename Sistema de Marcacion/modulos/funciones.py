@@ -385,7 +385,7 @@ def Actualizar_Datos(id_dispositivo, marcacion):
         if ultima_marcacion is None or marca.timestamp >= ultima_marcacion['marcacion']:
 
             for empleado in empleados_id:
-                print(empleado['id_empleado'])
+                #Desde aqui no funciona el codigo
                 if marca.user_id == empleado['id_empleado']:
                     tipo, detalle, horas_trabajadas = EntradaoSalida(marca, id_dispositivo)
                     Marcados(marca, id_dispositivo, tipo, detalle, horas_trabajadas)  
