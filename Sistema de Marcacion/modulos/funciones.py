@@ -6,7 +6,7 @@ from modulos.generate_zk_testdata import data
 
 
 
-#Funcion para insertar usuarios
+#Funcion para insertar usuarios a la BD
 def UsuarioIn(users):
 	cursor = obtener_conexion()
 	for user in users:
@@ -15,15 +15,7 @@ def UsuarioIn(users):
 		cursor.commit()
 	cursor.close()
 
-def departamento():
-    conexion = obtener_conexion()
-    with conexion.cursor() as cursor:
-        cursor.execute("SELECT id_departamento FROM departamentos")
-        departamentos_unico = cursor.fetchone()
-    conexion.close()
-    return departamentos_unico
-
-
+#Funcion para obtener todas las ID de todos los empleados
 def obtener_empleados_TODOS():
     conexion = obtener_conexion()
     empleados_TODOS = []
@@ -33,10 +25,7 @@ def obtener_empleados_TODOS():
     conexion.close()
     return empleados_TODOS
 
-
-
-
-
+#Funcion para obtener la ultima marcacion de un empleado cuya marcacion es entrada
 def ultima_marcacion_empleado(id_empleado, id_dispositivo, fecha_marcacion):
     conexion = obtener_conexion()
     tipo_salida = 'entrada'
@@ -49,6 +38,7 @@ def ultima_marcacion_empleado(id_empleado, id_dispositivo, fecha_marcacion):
         return ultima_marcacion_empleado['marcacion']
     return None
 
+#Funcion para obtener el ultimo empleado de la BD
 def obtener_ultimo_empleado(id_empleado):
     conexion = obtener_conexion()
     with conexion.cursor() as cursor:
@@ -56,7 +46,6 @@ def obtener_ultimo_empleado(id_empleado):
         ultimo_empleado = cursor.fetchone()
     conexion.close()
     return ultimo_empleado
-
 
 #Funcion para Insertar empleados a la BD
 def Empleados(empleado, departamento_unico):
@@ -70,7 +59,6 @@ def Empleados(empleado, departamento_unico):
 
     cursor.close()
     conexion.close()
-
 
 #Funcion para Insertar empleados a la BD
 def empleados_formulario(id, nombre, departamento):
@@ -87,7 +75,6 @@ def empleados_formulario(id, nombre, departamento):
 
 #Funcion para Insertar marcaciones a la BD
 def Marcados(marca, nombre_ZK, tipo, detalle, horas_trabajadas):
-    print("entro a la funcion mARCADOS")
     conexion = obtener_conexion()
     cursor = conexion.cursor() 
 
@@ -118,7 +105,7 @@ def obtener_dispositivos_activos():
     conexion.close()
     return dispositivos
 
-
+#Funcion para obtener todos los dispositivos de la BD
 def obtener_dispositivos():
     dispositivos = []
     conexion = obtener_conexion()
@@ -128,6 +115,7 @@ def obtener_dispositivos():
     conexion.close()
     return dispositivos
 
+#Funcion para obtener la ID de un dispositivo en base a los paramentros de IP y Puerto
 def obtener_dispositivos_ZK(ip, puerto):
     conexion = obtener_conexion()
     with conexion.cursor() as cursor:
@@ -136,6 +124,7 @@ def obtener_dispositivos_ZK(ip, puerto):
     conexion.close()
     return dispositivos_ZK
 
+#Funcion para obtener especificamente un dispositivo que prueba para uso si no se dispone de un dispositivo real
 def obtener_dispositivos_Prueba():
     conexion = obtener_conexion()
     with conexion.cursor() as cursor:
@@ -154,6 +143,7 @@ def obtener_horario(id):
     conexion.close()
     return horarios
 
+#Funcion para obtener todos los horarios de la BD
 def obtener_horarios():
     horarios = []
     conexion = obtener_conexion()
@@ -173,6 +163,7 @@ def obtener_departamento(id):
     conexion.close()
     return departamentos
 
+#Funcion para obtener departamentos para mostrar en la tabla web del sistema
 def obtener_departamentos():
     departamentos = []
     conexion = obtener_conexion()
@@ -194,10 +185,10 @@ def obtener_empleado(id):
     with conexion.cursor() as cursor:
         cursor.execute(f"SELECT FK_departamento FROM empleado WHERE id_empleado = {id}")
         empleados = cursor.fetchone()
-        print(empleados)
     conexion.close()
     return empleados
 
+#Funcion para obtener empleaddos para el formulario para editar  empleados
 def obtener_empleado_Formulario(id):
     conexion = obtener_conexion()
     with conexion.cursor() as cursor:
@@ -206,6 +197,7 @@ def obtener_empleado_Formulario(id):
     conexion.close()
     return empleados
 
+#Funcion para Actualizar empleados de la tabla a de la BD
 def actualizar_empleado(id, nombre, activo, departamento):
     conexion = obtener_conexion()
     with conexion.cursor() as cursor:
@@ -262,14 +254,13 @@ def Capturar_DatosZK():
                 Actualizar_Datos_Empleados(empleados)
                 nombre_ZK = dispositivo['id_dispositivo']
                 Actualizar_Datos(nombre_ZK, marcaciones)
-                print("entro a la funcion Capturar")
 
         except Exception as e:
             print(f"Error: {e}")
-            # dipositivoPrueba = obtener_dispositivos_Prueba()
-            # generador_marcaciones = data
-            # nombre_ZK = dipositivoPrueba['id_dispositivo']
-            # Actualizar_Datos(nombre_ZK,generador_marcaciones)
+            dipositivoPrueba = obtener_dispositivos_Prueba()
+            generador_marcaciones = data
+            nombre_ZK = dipositivoPrueba['id_dispositivo']
+            Actualizar_Datos(nombre_ZK,generador_marcaciones)
 
 #Funcion que obtiene los datos del formulario de dipositivos para hacer la conexion y tomar los datos
 def dispositivo_ZK(ip, puerto):
@@ -284,8 +275,6 @@ def dispositivo_ZK(ip, puerto):
         nombre_ZK = obtener_dispositivos_ZK(ip, puerto)
         Actualizar_Datos(nombre_ZK, marcaciones)
 
-
-
 #Funcion para convertir un valor a time
 def asegurar_time(valor):
     if isinstance(valor, timedelta):
@@ -293,9 +282,7 @@ def asegurar_time(valor):
     return valor
 
 #Funcion para saber si la marcacion es de tipo Entrada o Salida y cuantas horas trabajo y que en condiciones llego al trabajo
-
 def EntradaoSalida(marcacion, id_dispositivo):
-    print("entro a la funcion Entrada O  sALIDA")
     empleado = obtener_empleado(marcacion.user_id)
 
     departamento = obtener_departamento(empleado['FK_departamento'])
@@ -318,6 +305,7 @@ def EntradaoSalida(marcacion, id_dispositivo):
     detalle = ''
     horas_trabajadas = timedelta(0)
     horas_trabajadas_decimales = None
+
     # Salida mañana (verificar antes de entrada tarde para evitar conflictos)
     if salida_manana - timedelta(minutes=10) <= hora_marcacion < entrada_tarde:
         tipo = 'salida'
@@ -358,17 +346,16 @@ def EntradaoSalida(marcacion, id_dispositivo):
 
     return tipo, detalle, horas_trabajadas_decimales
 
-
-
-
-
-
-
-
+#Funcion para filtrar marcaciones, cuyas marcaciones filtran si estan realacionadas con los empleados de la BD
+def Filtrados(marcaciones):
+        empleados_id = obtener_empleados_TODOS()
+        ids_validos = {e['id_empleado']for e in empleados_id}
+    
+        marcas_filtradas = [m for m in marcaciones if int(m.user_id) in ids_validos]
+        return marcas_filtradas
 
 #Funcion que toma los datos de la marcacion en bruto, antes de capturar mira si no son iguales y despues devuelve ese valor para que pase por la sgte funcion
 def Actualizar_Datos(id_dispositivo, marcacion):
-    print("entro a la funcion Actualizar1")
     conexion = obtener_conexion()
     try:
         with conexion.cursor() as cursor:
@@ -378,18 +365,13 @@ def Actualizar_Datos(id_dispositivo, marcacion):
         conexion.commit()
     finally:
         conexion.close()
-    print("entro a la funcion Actualizar2")
-    empleados_id = obtener_empleados_TODOS()
-    print("entro a la funcion Actualizar3")
+
+    marcacion = Filtrados(marcacion, id_dispositivo)
+
     for marca in marcacion:
-        if ultima_marcacion is None or marca.timestamp >= ultima_marcacion['marcacion']:
-
-            for empleado in empleados_id:
-                #Desde aqui no funciona el codigo
-                if marca.user_id == empleado['id_empleado']:
-                    tipo, detalle, horas_trabajadas = EntradaoSalida(marca, id_dispositivo)
-                    Marcados(marca, id_dispositivo, tipo, detalle, horas_trabajadas)  
-
+        if ultima_marcacion is None or marca.timestamp >= ultima_marcacion['marcacion']:   
+            tipo, detalle, horas_trabajadas = EntradaoSalida(marca, id_dispositivo)
+            Marcados(marca, id_dispositivo, tipo, detalle, horas_trabajadas)  
 
 #Funcion que toma los datos de los empleados en bruto, antes de enviarlo a la BD mira si no es un empleado que ya existe en la tabla en la BD
 def Actualizar_Datos_Empleados(empleados):
@@ -399,6 +381,4 @@ def Actualizar_Datos_Empleados(empleados):
         if ultimo_empleado is None:
             Empleados(empleado,1)
 
-#Capturar_DatosZK()
-#obtener_empleado(4086443)
 

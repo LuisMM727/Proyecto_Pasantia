@@ -112,3 +112,7 @@ Esta pantalla tendra la funcion de generar un reporte  en formato digital(tabla)
 Se tendra un filtrado de busqueda
 -por departamento, id, nombre,
 
+---SUGERANCIAS
+si paso algun evento mostar algo para el usuario
+botones de regreso
+que no se pueda entrar al index o demas hasta que este logeado
