@@ -228,7 +228,9 @@ def obtener_marcacion():
         cursor.execute("""SELECT 
 	                        m.id_marcacion, 
                             m.marcacion, 
-                            m.tipo, 
+                            m.tipo,
+                            m.detalle,
+                            m.horas_trabajadas,
                             e.nombre_empleado, 
                             d.nombre_dispositivo 
                         FROM marcados AS m 
@@ -366,7 +368,7 @@ def Actualizar_Datos(id_dispositivo, marcacion):
     finally:
         conexion.close()
 
-    marcacion = Filtrados(marcacion, id_dispositivo)
+    #marcacion = Filtrados(marcacion, id_dispositivo)
 
     for marca in marcacion:
         if ultima_marcacion is None or marca.timestamp >= ultima_marcacion['marcacion']:   
@@ -380,5 +382,3 @@ def Actualizar_Datos_Empleados(empleados):
         ultimo_empleado = obtener_ultimo_empleado(empleado.user_id)
         if ultimo_empleado is None:
             Empleados(empleado,1)
-
-
