@@ -11,6 +11,15 @@ def PasswordHash(password):
     hash = generate_password_hash(password)
     return hash
 
+def Departamentos():
+    conexion = obtener_conexion()
+    departamentos = []
+    with conexion.cursor() as cursor:
+        cursor.execute("SELECT id_departamento, nombre_departamento FROM departamentos")
+        departamentos = cursor.fetchall()
+    conexion.close()
+    return departamentos
+
 #Funcion para insertar usuarios a la BD
 def UsuarioIn(users):
 	cursor = obtener_conexion()

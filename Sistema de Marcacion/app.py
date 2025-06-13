@@ -7,7 +7,8 @@ from modulos.funciones import (
     obtener_empleado_Formulario, actualizar_empleado, empleados_formulario, dispositivo_formulario, 
     obtener_dispositivo_Formulario, actualizar_dispositivo, horarios_formulario, obtener_horario_Formulario,
     actualizar_horarios, obtener_horarios_Departamentos, departamento_formulario, obtener_departamento_Formulario,
-    actualizar_departamentos, PasswordHash, usuario_formulario, actualizar_usuarios, obtener_usuarios_Formulario
+    actualizar_departamentos, PasswordHash, usuario_formulario, actualizar_usuarios, obtener_usuarios_Formulario,
+    Departamentos
 )
 from modulos.generate_zk_testdata import data
 
@@ -29,6 +30,7 @@ def login():
         if datos:
             if check_password_hash(datos['password_usuario'], password):
                 session['usuario'] = datos['nombre_usuario']
+                session['rol'] = bool(datos['rol'])  
                 return redirect(url_for('index'))
             else:
                 flash('Contraseña incorrecta', 'danger')
@@ -36,6 +38,7 @@ def login():
             flash('Usuario no encontrado', 'danger')
 
     return render_template('login.html')
+
 
 # Pantalla index-Home
 @app.route('/index', methods=['GET', 'POST'])
@@ -127,15 +130,18 @@ def agregar_empleado():
     if 'usuario' not in session:
         return redirect(url_for('login'))
 
+    departamentos = Departamentos()
+
     if request.method == 'POST':
         id_empleado = request.form['id']
         nombre = request.form['nombre']
-        departamento = request.form['departamento']
+        departamento = int(request.form['departamento'])
+
         empleados_formulario(id_empleado, nombre, departamento)
         flash('Empleado agregado correctamente', 'success')
         return redirect(url_for('empleados'))
 
-    return render_template('agregar_empleados.html')
+    return render_template('agregar_empleados.html', departamentos=departamentos)
 
 # Pantalla para editar empleados
 @app.route('/editar_empleado/<int:id>', methods=['GET', 'POST'])
@@ -144,6 +150,7 @@ def editar_empleado(id):
         return redirect(url_for('login'))
 
     empleado = obtener_empleado_Formulario(id)
+    departamentos = Departamentos()
 
     if request.method == 'POST':
         id_empleado = request.form['id']
@@ -154,7 +161,7 @@ def editar_empleado(id):
         flash('Empleado actualizado correctamente', 'success')
         return redirect(url_for('empleados'))
 
-    return render_template('editar_empleados.html', empleado=empleado)
+    return render_template('editar_empleados.html', empleado=empleado, departamentos=departamentos)
 
 # Pantalla de horarios
 @app.route('/horarios')
@@ -269,22 +276,23 @@ def usuarios():
 def agregar_usuario():
     if 'usuario' not in session:
         return redirect(url_for('login'))
-    
 
     if request.method == 'POST':
         nombre = request.form['nombre']
         password = request.form['password']
-        rol = request.form['rol'] == 'True' 
-    
+        rol = request.form['rol'] == 'True'  # Este es tu campo booleano desde el select
 
-        password_hash = PasswordHash(password)
+        if not password:
+            flash('La contraseña no puede estar vacía.', 'danger')
+            return redirect(url_for('agregar_usuario'))
+
+        password_hash = generate_password_hash(password)
 
         usuario_formulario(nombre, password_hash, rol)
         flash('Usuario agregado correctamente', 'success')
         return redirect(url_for('usuarios'))
 
     return render_template('agregar_usuarios.html')
-
 
 
 # Pantalla para editar usuarios

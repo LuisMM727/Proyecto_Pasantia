@@ -23,11 +23,12 @@
 
 <!-- Contenido Principal -->
 <div class="main-content">
+    <a href="{{ url_for('horarios') }}" class="btn btn-secondary btn-lg">Volver</a>
 
     <div class="container mt-4">
         <h2 class="mb-4">Editar Horario</h2>
 
-        <form method="post" class="card shadow p-4">
+        <form method="post" class="card shadow p-4" onsubmit="return confirmarGuardado()">
             <div class="mb-3">
                 <label for="descripcion" class="form-label">Descripcion</label>
                 <input type="text" class="form-control" id="descripcion" name="descripcion" value="{{ horarios.descripcion }}" required>
@@ -74,6 +75,11 @@
             <button type="submit" class="btn btn-primary">Guardar cambios</button>
             <a href="{{ url_for('horarios') }}" class="btn btn-secondary ms-2">Cancelar</a>
         </form>
+        <script>
+            function confirmarGuardado() {
+                return confirm("¿Estás seguro de que deseas guardar este empleado?");
+            }
+        </script>
     </div>
 
 </div>

@@ -23,11 +23,12 @@
 
 <!-- Contenido Principal -->
 <div class="main-content">
+    <a href="{{ url_for('usuarios') }}" class="btn btn-secondary btn-lg">Volver</a>
 
     <div class="container mt-4">
         <h2 class="mb-4">Editar Usuario</h2>
 
-        <form method="post" class="card shadow p-4">
+        <form method="post" class="card shadow p-4" onsubmit="return confirmarGuardado()">
             <div class="mb-3">
                 <label for="nombre" class="form-label">Nombre</label>
                 <input type="text" class="form-control" id="nombre" name="nombre" value="{{ usuarios.nombre_usuario }}" required>
@@ -55,6 +56,11 @@
             <button type="submit" class="btn btn-primary">Guardar cambios</button>
             <a href="{{ url_for('usuarios') }}" class="btn btn-secondary ms-2">Cancelar</a>
         </form>
+        <script>
+            function confirmarGuardado() {
+                return confirm("¿Estás seguro de que deseas guardar este empleado?");
+            }
+        </script>
     </div>
 
 </div>
