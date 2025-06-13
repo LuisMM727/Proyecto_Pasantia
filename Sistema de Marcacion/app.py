@@ -1,11 +1,13 @@
 from flask import Flask, render_template, request, redirect, session, url_for, flash
 from modulos.conexionDB import conexion as con
-
 from werkzeug.security import check_password_hash
 from modulos.funciones import (
     obtener_marcacion, Capturar_DatosZK, dispositivo_ZK, obtener_dispositivos,
     obtener_empleados, obtener_horarios, obtener_departamentos, obtener_usuarios,
-    obtener_empleado_Formulario, actualizar_empleado, empleados_formulario
+    obtener_empleado_Formulario, actualizar_empleado, empleados_formulario, dispositivo_formulario, 
+    obtener_dispositivo_Formulario, actualizar_dispositivo, horarios_formulario, obtener_horario_Formulario,
+    actualizar_horarios, obtener_horarios_Departamentos, departamento_formulario, obtener_departamento_Formulario,
+    actualizar_departamentos, PasswordHash, usuario_formulario, actualizar_usuarios, obtener_usuarios_Formulario
 )
 from modulos.generate_zk_testdata import data
 
@@ -63,6 +65,43 @@ def dispositivos():
 
     dispositivos = obtener_dispositivos()
     return render_template("dispositivos.html", dispositivos=dispositivos)
+
+# Pantalla agregar dispositivos
+@app.route('/agregar_dispositivo', methods=['GET', 'POST'])
+def agregar_dispositivo():
+    if 'usuario' not in session:
+        return redirect(url_for('login'))
+
+    if request.method == 'POST':
+        descripcion = request.form['descripcion']
+        nombre = request.form['nombre']
+        puerto = request.form['puerto']
+        ip = request.form['ip']
+        dispositivo_formulario(descripcion, nombre, puerto, ip)
+        flash('Dispositivo agregado correctamente', 'success')
+        return redirect(url_for('dispositivos'))
+
+    return render_template('agregar_dispositivos.html')
+
+# Pantalla para editar dispositivos
+@app.route('/editar_dispositivo/<int:id>', methods=['GET', 'POST'])
+def editar_dispositivo(id):
+    if 'usuario' not in session:
+        return redirect(url_for('login'))
+
+    dispositivos = obtener_dispositivo_Formulario(id)
+
+    if request.method == 'POST':
+        descripcion = request.form['descripcion']
+        nombre = request.form['nombre']
+        activo = 1 if 'activo' in request.form else 0
+        puerto = request.form['puerto']
+        ip = request.form['ip']
+        actualizar_dispositivo(descripcion, nombre, activo, puerto, ip, )
+        flash('Dispositivo actualizado correctamente', 'success')
+        return redirect(url_for('empleados'))
+
+    return render_template('editar_dispositivos.html', dispositivos=dispositivos)
 
 # Pantalla de marcacion
 @app.route('/marcacion')
@@ -126,6 +165,49 @@ def horarios():
     horarios = obtener_horarios()
     return render_template("horarios.html", horarios=horarios)
 
+# Pantalla agregar horario
+@app.route('/agregar_horario', methods=['GET', 'POST'])
+def agregar_horario():
+    if 'usuario' not in session:
+        return redirect(url_for('login'))
+
+    if request.method == 'POST':
+        descripcion = request.form['descripcion']
+        entrada_manana = request.form['entrada_manana']
+        salida_manana = request.form['salida_manana']
+        tolerancia_manana = request.form['tolerancia_manana']
+        entrada_tarde = request.form['entrada_tarde']
+        salida_tarde = request.form['salida_tarde']
+        tolerancia_tarde = request.form['tolerancia_tarde']
+        horarios_formulario(descripcion, entrada_manana, salida_manana, tolerancia_manana,  entrada_tarde, salida_tarde, tolerancia_tarde)
+        flash('Horario agregado correctamente', 'success')
+        return redirect(url_for('horarios'))
+
+    return render_template('agregar_horarios.html')
+
+# Pantalla para editar horarios
+@app.route('/editar_horario/<int:id>', methods=['GET', 'POST'])
+def editar_horario(id):
+    if 'usuario' not in session:
+        return redirect(url_for('login'))
+
+    horarios = obtener_horario_Formulario(id)
+
+    if request.method == 'POST':
+        descripcion = request.form['descripcion']
+        entrada_manana = request.form['entrada_manana']
+        salida_manana = request.form['salida_manana']
+        tolerancia_manana = request.form['tolerancia_manana']
+        entrada_tarde = request.form['entrada_tarde']
+        salida_tarde = request.form['salida_tarde']
+        tolerancia_tarde = request.form['tolerancia_tarde']
+        activo = 1 if 'activo' in request.form else 0
+        actualizar_horarios(descripcion, entrada_manana, salida_manana, tolerancia_manana, entrada_tarde, salida_tarde, tolerancia_tarde, activo)
+        flash('Horario actualizado correctamente', 'success')
+        return redirect(url_for('horarios'))
+
+    return render_template('editar_horarios.html', horarios=horarios)
+
 # Pantalla de departamentos
 @app.route('/departamentos')
 def departamentos():
@@ -134,6 +216,43 @@ def departamentos():
 
     departamentos = obtener_departamentos()
     return render_template("departamentos.html", departamentos=departamentos)
+
+# Pantalla agregar departamento
+@app.route('/agregar_departamento', methods=['GET', 'POST'])
+def agregar_departamento():
+    if 'usuario' not in session:
+        return redirect(url_for('login'))
+    
+    horarios = obtener_horarios_Departamentos()
+
+    if request.method == 'POST':
+        nombre = request.form['descripcion']
+        horario = int(request.form['id_horario'])
+        departamento_formulario(nombre, horario)
+        flash('Departamento agregado correctamente', 'success')
+        return redirect(url_for('departamentos'))
+
+    return render_template('agregar_departamentos.html', horarios=horarios)
+
+# Pantalla para editar departamentos
+@app.route('/editar_departamento/<int:id>', methods=['GET', 'POST'])
+def editar_departamento(id):
+    if 'usuario' not in session:
+        return redirect(url_for('login'))
+
+    departamentos = obtener_departamento_Formulario(id)
+    horarios = obtener_horarios_Departamentos()
+
+    if request.method == 'POST':
+        nombre = request.form['nombre']
+        horario = int(request.form['id_horario'])
+        activo = 1 if 'activo' in request.form else 0
+        actualizar_departamentos(nombre, horario, activo)
+        flash('Departamento actualizado correctamente', 'success')
+        return redirect(url_for('departamentos'))
+
+    return render_template('editar_departamentos.html', departamentos=departamentos, horarios=horarios)
+
 
 # Pantalla de usuarios
 @app.route('/usuarios')
@@ -144,34 +263,49 @@ def usuarios():
     usuarios = obtener_usuarios()
     return render_template("usuarios.html", usuarios=usuarios)
 
-#Pantalla de Reportes
-@app.route('/reportes')
-def reportes():
+
+# Pantalla agregar usuario
+@app.route('/agregar_usuario', methods=['GET', 'POST'])
+def agregar_usuario():
+    if 'usuario' not in session:
+        return redirect(url_for('login'))
+    
+
+    if request.method == 'POST':
+        nombre = request.form['nombre']
+        password = request.form['password']
+        rol = request.form['rol'] == 'True' 
+    
+
+        password_hash = PasswordHash(password)
+
+        usuario_formulario(nombre, password_hash, rol)
+        flash('Usuario agregado correctamente', 'success')
+        return redirect(url_for('usuarios'))
+
+    return render_template('agregar_usuarios.html')
+
+
+
+# Pantalla para editar usuarios
+@app.route('/editar_usuario/<int:id>', methods=['GET', 'POST'])
+def editar_usuario(id):
     if 'usuario' not in session:
         return redirect(url_for('login'))
 
-    return render_template("reportes.html")
+    usuarios = obtener_usuarios_Formulario(id)
 
-#Pantalla de Reportes de empleados
-@app.route('/reportes_empleados')
-def reportes_empleados():
-    if 'usuario' not in session:
-        return redirect(url_for('login'))
+    if request.method == 'POST':
+        nombre = request.form['nombre']
+        password = request.form['password']
+        password_hash = password_hash(password)
+        rol = request.form['rol'] == 'True' 
+        activo = 1 if 'activo' in request.form else 0
+        actualizar_usuarios(nombre, password_hash, activo, rol)
+        flash('Usuario actualizado correctamente', 'success')
+        return redirect(url_for('usuarios'))
 
-    return render_template("reportes_empleados.html")
-
-#Pantalla de Reportes de Marcaciones
-@app.route('/reportes_marcacion')
-def reportes_marcacion():
-    if 'usuario' not in session:
-        return redirect(url_for('login'))
-
-    return render_template("reportes_marcacion.html")
-
-
-
-
-
+    return render_template('editar_usuarios.html', usuarios=usuarios)
 
 
 

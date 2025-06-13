@@ -12,3 +12,7 @@ cursor.execute("INSERT INTO usuarios (nombre_usuario, password_usuario, activo) 
 print("Se genero el usuario")
 conexion.commit()
 conexion.close()
+
+def PasswordHash(password):
+    hash = generate_password_hash(password)
+    return hash

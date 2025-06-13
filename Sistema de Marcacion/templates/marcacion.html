@@ -41,31 +41,37 @@
 
         $('#example').DataTable({
             dom: 'Bfrtip',
-            buttons: [
+buttons: [
+    {
+        extend: 'pdfHtml5',
+        text: 'Exportar PDF',
+        title: 'Listado de Empleados',
+        action: function (e, dt, button, config) {
+            // Confirmación antes de exportar
+            if (confirm("¿Está seguro que desea exportar el reporte a PDF?")) {
+                // Ejecutar exportación original si confirma
+                $.fn.dataTable.ext.buttons.pdfHtml5.action.call(this, e, dt, button, config);
+            }
+        },
+        customize: function (doc) {
+            doc.pageMargins = [40, 60, 40, 60];
+            doc.defaultStyle.fontSize = 12;
+            doc.styles.tableHeader.fontSize = 14;
+            doc.styles.title.fontSize = 18;
+            doc.styles.title.alignment = 'center';
+
+            doc.content.splice(0, 0,
                 {
-                    extend: 'pdfHtml5',
-                    text: 'Exportar PDF',
-                    title: 'Listado de Empleados',
-                    customize: function (doc) {
-                        doc.pageMargins = [40, 60, 40, 60];
-                        doc.defaultStyle.fontSize = 12;
-                        doc.styles.tableHeader.fontSize = 14;
-                        doc.styles.title.fontSize = 18;
-                        doc.styles.title.alignment = 'center';
-                        
-                        // Agregar encabezado con fecha y usuario
-                        doc.content.splice(0, 0,
-                            {
-                                text: `Reporte de: ${usuario} a las ${fechaHora}`,
-                                margin: [0, 0, 0, 10],
-                                alignment: 'right',
-                                fontSize: 10,
-                                italics: true
-                            }
-                        );
-                    }
+                    text: `Reporte de: ${usuario} a las ${fechaHora}`,
+                    margin: [0, 0, 0, 10],
+                    alignment: 'right',
+                    fontSize: 10,
+                    italics: true
                 }
-            ],
+            );
+        }
+    }
+],
             language: {
                 url: '//cdn.datatables.net/plug-ins/1.13.4/i18n/es-ES.json'
             }
@@ -78,13 +84,12 @@
 <body>
 
     <div class="sidebar">
-        <h4 class="text-white text-center py-3">Panel</h4>
+        <h4 class="text-white text-center py-3">AsistOK</h4>
         <a href="{{ url_for('index') }}">Inicio</a>
         <a href="{{ url_for('marcacion') }}">Marcacion</a>
         <a href="{{ url_for('dispositivos') }}">Dispositivos</a>
         <a href="{{ url_for('empleados') }}">Empleados</a>
         <a href="{{ url_for('usuarios') }}">Usuarios</a>
-        <a href="#">Reportes</a>
         <a href="{{ url_for('departamentos') }}">Departamentos</a>
         <a href="{{ url_for('horarios') }}">Horarios</a>
         <a href="{{ url_for('logout') }}">Cerrar sesión</a>

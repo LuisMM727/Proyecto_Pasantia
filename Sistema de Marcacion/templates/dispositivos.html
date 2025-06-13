@@ -22,13 +22,12 @@
 
     <!-- Barrar Lateral -->
     <div class="sidebar">
-        <h4 class="text-white text-center py-3">Panel</h4>
+        <h4 class="text-white text-center py-3">AsistOK</h4>
         <a href="{{ url_for('index') }}">Inicio</a>
         <a href="{{ url_for('marcacion') }}">Marcacion</a>
         <a href="{{ url_for('dispositivos') }}">Dispositivos</a>
         <a href="{{ url_for('empleados') }}">Empleados</a>
         <a href="{{ url_for('usuarios') }}">Usuarios</a>
-        <a href="{{ url_for('reportes') }}">Reportes</a>
         <a href="{{ url_for('departamentos') }}">Departamentos</a>
         <a href="{{ url_for('horarios') }}">Horarios</a>
         <a href="{{ url_for('logout') }}">Cerrar sesión</a>
@@ -38,8 +37,7 @@
 
     <!-- Contenido principal -->
     <div class="main-content">
-        <button type="submit" name="accion" value="agregar">Agregar</button>
-        <button type="submit" name="accion" value="editar">Editar</button>
+        <a href="{{ url_for('agregar_dispositivo') }}"><button>Agregar Dispositivo</button></a>
         <!-- Topbar -->
         <table id="example" class="table table-striped table-bordered">
             <thead>
@@ -50,18 +48,25 @@
                     <th>Activo</th>
                     <th>IP</th>
                     <th>Puerto</th>
+                    <th>Accion</th>
+
 
                 </tr>
             </thead>
             <tbody>
                 {% for dispositivo in dispositivos %}
                 <tr>
-                    <td>{{dispositivo.id_dispositivo}}</td>
-                    <td>{{dispositivo.descripcion_dispositivo}}</td>
-                    <td>{{dispositivo.nombre_dispositivo}}</td>
-                    <td>{{dispositivo.activo}}</td>
-                    <td>{{dispositivo.IP_dispositivo}}</td>
-                    <td>{{dispositivo.puerto}}</td>
+                    <td>{{ dispositivo.id_dispositivo }}</td>
+                    <td>{{ dispositivo.descripcion_dispositivo }}</td>
+                    <td>{{ dispositivo.nombre_dispositivo }}</td>
+                    <td>{{ dispositivo.activo }}</td>
+                    <td>{{ dispositivo.IP_dispositivo }}</td>
+                    <td>{{ dispositivo.puerto }}</td>
+                    <td>
+                        <a href="{{ url_for('editar_dispositivo', id=dispositivo.id_dispositivo) }}">
+                            <button>Editar</button>
+                        </a>
+                    </td>
                 </tr>
                 {% endfor %}
             </tbody> 

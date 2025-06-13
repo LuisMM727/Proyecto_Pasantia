@@ -3,8 +3,13 @@ from modulos.conexionDB import obtener_conexion
 from zk import ZK
 from datetime import  datetime, timedelta, time
 from modulos.generate_zk_testdata import data
+from werkzeug.security import generate_password_hash
 
 
+# Funcion para convertir una contraseña a hash
+def PasswordHash(password):
+    hash = generate_password_hash(password)
+    return hash
 
 #Funcion para insertar usuarios a la BD
 def UsuarioIn(users):
@@ -60,6 +65,57 @@ def Empleados(empleado, departamento_unico):
     cursor.close()
     conexion.close()
 
+#Funcion para Insertar dispositivos a la BD
+def dispositivo_formulario(descripcion, nombre, puerto, ip):
+    activo = True
+    conexion = obtener_conexion()
+    cursor = conexion.cursor() 
+
+    consulta = "INSERT INTO dispositivos(descripcion_dispositivo, nombre_dispositivo, activo, puerto, IP_dispositivo) VALUES (%s, %s, %s, %s, %s);"
+    cursor.execute(consulta, (descripcion, nombre, activo, puerto, ip ))
+    conexion.commit()
+
+    cursor.close()
+    conexion.close()
+
+def horarios_formulario(descripcion, entrada_manana, salida_manana, tolerancia_manana, entrada_tarde, salida_tarde, tolerancia_tarde):
+    activo = True
+    conexion = obtener_conexion()
+    cursor = conexion.cursor() 
+
+    consulta = "INSERT INTO horarios(descripcion, entrada_manana, salida_manana, tolerancia_manana, entrada_tarde, salida_tarde, tolerancia_tarde, activo) VALUES (%s, %s, %s, %s, %s, %s, %s, %s);"
+    cursor.execute(consulta, (descripcion, entrada_manana, salida_manana, tolerancia_manana, entrada_tarde, salida_tarde, tolerancia_tarde, activo ))
+    conexion.commit()
+
+    cursor.close()
+    conexion.close() 
+
+#Funcion para Insertar departamentos a la BD
+def departamento_formulario(nombre, horario):
+    activo = True
+    conexion = obtener_conexion()
+    cursor = conexion.cursor() 
+
+    consulta = "INSERT INTO departamentos(nombre_departamento, activo, FK_horario) VALUES (%s, %s, %s);"
+    cursor.execute(consulta, (nombre, activo, horario ))
+    conexion.commit()
+
+    cursor.close()
+    conexion.close()
+
+#Funcion para Insertar usuario a la BD
+def usuario_formulario(nombre, password, rol):
+    activo = True
+    conexion = obtener_conexion()
+    cursor = conexion.cursor() 
+
+    consulta = "INSERT INTO usuarios(nombre_usuario, password_usuario, activo, rol) VALUES (%s, %s, %s, %s);"
+    cursor.execute(consulta, (nombre, password, activo, rol ))
+    conexion.commit()
+
+    cursor.close()
+    conexion.close()    
+
 #Funcion para Insertar empleados a la BD
 def empleados_formulario(id, nombre, departamento):
     activo = True
@@ -94,6 +150,27 @@ def obtener_usuarios():
         usuarios = cursor.fetchall()
     conexion.close()
     return usuarios
+
+#Funcion para obtener horarios de la BD
+def obtener_horarios_Departamentos():
+    horarios = []
+    conexion = obtener_conexion()
+    with conexion.cursor() as cursor:
+        cursor.execute("SELECT  id_horario, descripcion FROM horarios")
+        horarios = cursor.fetchall()
+    conexion.close()
+    return horarios
+
+#Funcion para obtener usuario Roles de la BD
+def obtener_Usuario_rol(id):
+    usuarios = []
+    conexion = obtener_conexion()
+    with conexion.cursor() as cursor:
+        cursor.execute("SELECT  id_usuario, rol FROM usuarios")
+        usuarios = cursor.fetchall()
+    conexion.close()
+    return usuarios
+
 
 #Funcion para obtener todos los dispositivos de la BD los que estan activos
 def obtener_dispositivos_activos():
@@ -188,7 +265,7 @@ def obtener_empleado(id):
     conexion.close()
     return empleados
 
-#Funcion para obtener empleaddos para el formulario para editar  empleados
+#Funcion para obtener empleados para el formulario para editar empleados
 def obtener_empleado_Formulario(id):
     conexion = obtener_conexion()
     with conexion.cursor() as cursor:
@@ -197,6 +274,42 @@ def obtener_empleado_Formulario(id):
     conexion.close()
     return empleados
 
+#Funcion para obtener horarios para el formulario para editar horarios
+def obtener_horario_Formulario(id):
+    conexion = obtener_conexion()
+    with conexion.cursor() as cursor:
+        cursor.execute(f"SELECT * FROM horarios WHERE id_horario = {id}")
+        horarios = cursor.fetchone()
+    conexion.close()
+    return horarios
+
+#Funcion para obtener departamentos para el formulario para editar horarios
+def obtener_departamento_Formulario(id):
+    conexion = obtener_conexion()
+    with conexion.cursor() as cursor:
+        cursor.execute(f"SELECT * FROM departamentos WHERE id_departamento = {id}")
+        departamentos = cursor.fetchone()
+    conexion.close()
+    return departamentos
+
+#Funcion para obtener usuarios para el formulario para editar horarios
+def obtener_usuarios_Formulario(id):
+    conexion = obtener_conexion()
+    with conexion.cursor() as cursor:
+        cursor.execute(f"SELECT * FROM usuarios WHERE id_usuario = {id}")
+        usuarios = cursor.fetchone()
+    conexion.close()
+    return usuarios
+
+#Funcion para obtener dispositivos para el formulario para editar dispositivos
+def obtener_dispositivo_Formulario(id):
+    conexion = obtener_conexion()
+    with conexion.cursor() as cursor:
+        cursor.execute(f"SELECT * FROM dispositivos WHERE id_dispositivo = {id}")
+        dispositivos = cursor.fetchone()
+    conexion.close()
+    return dispositivos
+
 #Funcion para Actualizar empleados de la tabla a de la BD
 def actualizar_empleado(id, nombre, activo, departamento):
     conexion = obtener_conexion()
@@ -204,6 +317,41 @@ def actualizar_empleado(id, nombre, activo, departamento):
         cursor.execute("""UPDATE empleado SET nombre_empleado = %s, activo = %s, FK_departamento = %s WHERE id_empleado = %s""", (nombre, activo, departamento, id))
     conexion.commit()
     conexion.close()
+
+#Funcion para Actualizar dispositivos de la tabla a de la BD
+def actualizar_dispositivo(descripcion, nombre, activo, puerto, ip):
+    conexion = obtener_conexion()
+    with conexion.cursor() as cursor:
+        cursor.execute("""UPDATE dispositivos SET descripcion_dispositivo = %s, nombre_dispositivo = %s, activo = %s, puerto = %s""", (descripcion, nombre, activo, puerto, ip))
+    conexion.commit()
+    conexion.close()
+
+#Funcion para Actualizar horarios de la tabla a de la BD
+def actualizar_horarios(id, descripcion, entrada_manana, salida_manana, tolerancia_manana, entrada_tarde, salida_tarde, tolerancia_tarde, activo):
+    conexion = obtener_conexion()
+    with conexion.cursor() as cursor:
+        cursor.execute("""UPDATE dispositivos SET descripcion = %s, entrada_manana = %s, salida_manana = %s, tolerancia_manana = %s, SET entrada_tarde = %s, SET salida_tarde = %s, SET tolerancia_tarde = %s,  SET activo = %s""", (descripcion, entrada_manana, salida_manana, tolerancia_manana, entrada_tarde, salida_tarde, tolerancia_tarde, activo))
+    conexion.commit()
+    conexion.close()
+
+
+#Funcion para Actualizar departamentos de la tabla a de la BD
+def actualizar_departamentos(nombre, activo, horario):
+    conexion = obtener_conexion()
+    with conexion.cursor() as cursor:
+        cursor.execute("""UPDATE departamentos SET nombre = %s, activo = %s, FK_horario = %s""", (nombre, activo, horario))
+    conexion.commit()
+    conexion.close()
+
+
+#Funcion para Actualizar usuarios de la tabla a de la BD
+def actualizar_usuarios(nombre, password, activo, rol):
+    conexion = obtener_conexion()
+    with conexion.cursor() as cursor:
+        cursor.execute("""UPDATE usuarios SET nombre_usuario = %s, password = %s, activo = %s , rol = %s""", (nombre, password, activo, rol))
+    conexion.commit()
+    conexion.close()
+
 
 def obtener_empleados():
     empleados = []
