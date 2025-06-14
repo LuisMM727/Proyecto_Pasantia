@@ -18,7 +18,7 @@
         <a href="{{ url_for('usuarios') }}">Usuarios</a>
         <a href="{{ url_for('departamentos') }}">Departamentos</a>
         <a href="{{ url_for('horarios') }}">Horarios</a>
-        <a href="{{ url_for('logout') }}">Cerrar sesión</a>
+        <a href="#" onclick="confirmarLogout()">Cerrar sesión</a>
     </div>
 
     <!-- Contenido principal -->
@@ -39,7 +39,13 @@
                 <button type="submit" name="accion" value="actualizar_todo">Actualizar Todo</button>
             </form>
         </div>
-        
+        <script>
+            function confirmarLogout() {
+                if (confirm("¿Estás seguro de que deseas cerrar sesión?")) {
+                    window.location.href = "{{ url_for('logout') }}";
+                }
+            }
+        </script>
     </div>
 
 </body>
