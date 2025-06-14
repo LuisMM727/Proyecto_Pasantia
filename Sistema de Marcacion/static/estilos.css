@@ -27,7 +27,7 @@ body {
 
 .main-content {
     flex: 1;
-    margin-left: 250px; /* Para dejar espacio al sidebar fijo */
+    margin-left: 250px; 
     padding: 20px 30px;
     background-color: #fff;
     min-height: 100vh;
@@ -39,17 +39,14 @@ body {
     border-bottom: 1px solid #dee2e6;
 }
 
-/* Tabla ajustada para ocupar todo el ancho */
 table {
     width: 100% !important;
 }
 
-/* Botones DataTables más espaciosos */
 .dt-buttons .btn {
     margin-right: 5px;
 }
 
-/* Botón para agregar empleado */
 button {
     background-color: #007bff;
     border: none;
