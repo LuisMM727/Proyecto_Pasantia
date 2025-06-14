@@ -11,6 +11,7 @@ def PasswordHash(password):
     hash = generate_password_hash(password)
     return hash
 
+#Funcion para obtener los id y nombre de los departamentos
 def Departamentos():
     conexion = obtener_conexion()
     departamentos = []
@@ -87,6 +88,7 @@ def dispositivo_formulario(descripcion, nombre, puerto, ip):
     cursor.close()
     conexion.close()
 
+#Funcion para Insertar horarios a la BD
 def horarios_formulario(descripcion, entrada_manana, salida_manana, tolerancia_manana, entrada_tarde, salida_tarde, tolerancia_tarde):
     activo = True
     conexion = obtener_conexion()
@@ -361,7 +363,7 @@ def actualizar_usuarios(nombre, password, activo, rol):
     conexion.commit()
     conexion.close()
 
-
+#Funcion para obtener las empleados de la BD
 def obtener_empleados():
     empleados = []
     conexion = obtener_conexion()
@@ -524,8 +526,6 @@ def Actualizar_Datos(id_dispositivo, marcacion):
         conexion.commit()
     finally:
         conexion.close()
-
-    #marcacion = Filtrados(marcacion, id_dispositivo)
 
     for marca in marcacion:
         if ultima_marcacion is None or marca.timestamp >= ultima_marcacion['marcacion']:   

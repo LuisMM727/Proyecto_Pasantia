@@ -1,3 +1,4 @@
+--Base de datos del Sistema AsistOK--
 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0;
 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0;
 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION';
@@ -56,7 +57,7 @@ CREATE TABLE IF NOT EXISTS `SistemaMC`.`empleado` (
   `activo` TINYINT NOT NULL,
   `FK_departamento` INT NOT NULL,
   PRIMARY KEY (`id_empleado`),
-  INDEX `FK_Departamento_idx` (`FK_departamento`),
+  INDEX `FK_Departamento_idx` (`FK_departamento` ASC),
   CONSTRAINT `FK_Departamento`
     FOREIGN KEY (`FK_departamento`)
     REFERENCES `SistemaMC`.`departamentos` (`id_departamento`)
@@ -86,6 +87,8 @@ CREATE TABLE IF NOT EXISTS `SistemaMC`.`marcados` (
   `id_marcacion` INT NOT NULL AUTO_INCREMENT,
   `marcacion` TIMESTAMP NOT NULL,
   `tipo` VARCHAR(50) NOT NULL,
+  `detalle` VARCHAR(45) NULL,
+  `horas_trabajadas` TIME NULL,
   `FK_empleado` INT NOT NULL,
   `FK_dispositivos` INT NOT NULL,
   PRIMARY KEY (`id_marcacion`),
@@ -112,6 +115,7 @@ CREATE TABLE IF NOT EXISTS `SistemaMC`.`usuarios` (
   `nombre_usuario` VARCHAR(50) NOT NULL,
   `password_usuario` VARCHAR(255) NOT NULL,
   `activo` TINYINT NOT NULL,
+  `rol` TINYINT NULL,
   PRIMARY KEY (`id_usuario`))
 ENGINE = InnoDB;
 
