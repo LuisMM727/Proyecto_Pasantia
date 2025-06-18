@@ -28,16 +28,26 @@
             <span>Bienvenido, {{ session['usuario'] }}</span>
         </div>
         <div class="topbar d-flex justify-content-between">
-            <form method="post">
+
+            <!-- Formulario: Conectar al dispositivo -->
+            <form method="post" onsubmit="this.querySelector('button').classList.add('loading')">
                 <p>Conectar al Dispositivo</p>
-                IP: <input type="text" name="ip_dispositivo"><br>
-                Puerto: <input type="number" name="puerto_dispositivo"><br>
-                <button type="submit" name="accion" value="conectar">Actualizar</button>
+                IP: <input type="text" name="ip_dispositivo" required><br>
+                Puerto: <input type="number" name="puerto_dispositivo" required><br>
+                <button type="submit" name="accion" value="conectar" class="btn btn-primary">
+                    <span class="spinner-border spinner-border-sm me-2 d-none" role="status" aria-hidden="true"></span>
+                    <span class="texto-boton">Actualizar</span>
+                </button>
             </form>
 
-            <form method="post">
-                <button type="submit" name="accion" value="actualizar_todo">Actualizar Todo</button>
+            <!-- Formulario: Actualizar Todo -->
+            <form method="post" onsubmit="this.querySelector('button').classList.add('loading')">
+                <button type="submit" name="accion" value="actualizar_todo" class="btn btn-success">
+                    <span class="spinner-border spinner-border-sm me-2 d-none" role="status" aria-hidden="true"></span>
+                    <span class="texto-boton">Actualizar Todo</span>
+                </button>
             </form>
+
         </div>
         <script>
             function confirmarLogout() {

@@ -280,7 +280,7 @@ def agregar_usuario():
     if request.method == 'POST':
         nombre = request.form['nombre']
         password = request.form['password']
-        rol = request.form['rol'] == 'True'  # Este es tu campo booleano desde el select
+        rol = request.form['rol'] == 'True'
 
         if not password:
             flash('La contraseña no puede estar vacía.', 'danger')

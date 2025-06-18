@@ -79,3 +79,11 @@ button:hover {
 .alert {
     margin-top: 15px;
 }
+
+button.loading .spinner-border {
+    display: inline-block !important;
+}
+
+button.loading .texto-boton {
+    display: none;
+}

@@ -121,4 +121,4 @@ hacer validaciones
 dias ausentes 
 poner roles
 colocar reporte cuantas veces llego tarde
-
+colocar la paginacion de las tablas en el back
