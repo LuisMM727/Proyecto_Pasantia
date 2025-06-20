@@ -3,26 +3,49 @@
 <head>
     <meta charset="UTF-8">
     <title>Empleados</title>
+    <!-- Bootstrap -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Estilos personalizados -->
     <link rel="stylesheet" href="{{ url_for('static', filename='estilos.css' ) }}">
+
+    <!-- Estilos de Bootstrap para DataTables -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.5.2/css/bootstrap.css">
+
+    <!-- Estilos CSS para DataTables con Bootstrap  -->
     <link rel="stylesheet" href="https://cdn.datatables.net/2.3.0/css/dataTables.bootstrap4.css">
+
+    <!-- jQuery (necesario para DataTables y Bootstrap JS) -->
     <script src="https://code.jquery.com/jquery-3.7.1.js"></script>
+
+    <!-- Popper.js requerido por Bootstrap para tooltips y popovers -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js"></script>
+
+    <!-- Bootstrap JS para funcionalidades JS -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+    <!-- Libreria DataTables principal -->
     <script src="https://cdn.datatables.net/2.3.0/js/dataTables.js"></script>
+
+    <!-- Integracion de DataTables con Bootstrap 4 -->
     <script src="https://cdn.datatables.net/2.3.0/js/dataTables.bootstrap4.js"></script>
+
+    <!-- Script para inicializar DataTables cuando el DOM este listo -->
     <script>
         $(document).ready(function() {
-        $('#example').DataTable();} );
+            $('#example').DataTable();  
+        });
     </script>
 
 </head>
 <body>
 
-    <!-- Barrar Lateral -->
+    <!-- Barra Lateral -->
     <div class="sidebar">
+        <!-- Nombre del sistema en barra lateral -->
         <h4 class="text-white text-center py-3">AsistOK</h4>
+
+        <!-- Enlaces de navegacion -->
         <a href="{{ url_for('index') }}">Inicio</a>
         <a href="{{ url_for('marcacion') }}">Marcacion</a>
         <a href="{{ url_for('dispositivos') }}">Dispositivos</a>
@@ -30,13 +53,17 @@
         <a href="{{ url_for('usuarios') }}">Usuarios</a>
         <a href="{{ url_for('departamentos') }}">Departamentos</a>
         <a href="{{ url_for('horarios') }}">Horarios</a>
+
+        <!-- Enlace para cerrar sesion con funcion confirmacion -->
         <a href="#" onclick="confirmarLogout()">Cerrar sesión</a>
     </div>
 
     <!-- Contenido principal -->
     <div class="main-content">
+        <!-- Boton para ir a la pagina de agregar empleado -->
         <a href="{{ url_for('agregar_empleado') }}"><button>Agregar Empleado</button></a>
-        <!-- Topbar -->
+
+        <!-- Tabla para mostrar la lista de empleados con DataTables -->
         <table id="example" class="table table-striped table-bordered">
             <thead>
                 <tr>
@@ -48,25 +75,26 @@
                 </tr>
             </thead>
             <tbody>
+                <!-- Recorre cada empleado enviado desde backend -->
                 {% for empleado in empleados %}
                 <tr>
                     <td>{{empleado.id_empleado}}</td>
                     <td>{{empleado.nombre_empleado}}</td>
                     <td>{{empleado.activo}}</td>
                     <td>{{empleado.nombre_departamento}}</td>
+                    <!-- Enlace para editar empleado, con boton -->
                     <td><a href="{{ url_for('editar_empleado', id=empleado.id_empleado) }}"><button>Editar</button></a></td>
                 </tr>
                 {% endfor %}
             </tbody> 
         </table>
-        <script>
-            function confirmarLogout() {
-                if (confirm("¿Estás seguro de que deseas cerrar sesión?")) {
-                    window.location.href = "{{ url_for('logout') }}";
-                }
-            }
-        </script>
     </div>
+<!-- Scripts JS -->
 
+<!-- Variable global para URL de logout, utilizada en scripts.js -->
+<script>const logoutUrl = "{{ url_for('logout') }}";</script>
+
+<!-- Archivo JS externo con funciones para confirmaciones -->
+<script src="{{ url_for('static', filename='scripts.js') }}"></script>
 </body>
 </html>
