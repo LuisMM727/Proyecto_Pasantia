@@ -45,6 +45,7 @@ Para el correcto funcionamiento del sistema, se requieren los siguientes compone
 * **Red Local (LAN):** Conectividad de red para que los marcadores puedan comunicarse con el servidor y las estaciones de trabajo puedan acceder a la aplicación web.
 * **Estaciones de Trabajo:** Computadoras con un navegador web actualizado para acceder a la interfaz de administración del sistema.
 * **Software de Base de Datos:** MySQL Server instalado y configurado en el servidor.
+* **Tipo de Base de Datos:** MariaDB.
 * **Entorno Python:** Intérprete de Python y las librerías necesarias (ej: PyMySQL, Flask/Django, librerías para PDF como ReportLab/FPDF) instaladas en el servidor.
 
 ======================================================================
