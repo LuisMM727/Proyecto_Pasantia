@@ -45,6 +45,12 @@
             <!-- Llama a una funcion JS para confirmar antes de enviar -->
             <form method="post" class="card shadow p-5" onsubmit="return confirmarGuardado()">
 
+                <!-- Campo: ID del empleado -->
+                <div class="mb-4">
+                    <label for="nombre" class="form-label">ID del empleado</label>
+                    <input type="number" class="form-control form-control-lg" name="id" id="id" required>
+                </div>
+
                 <!-- Campo: Nombre del empleado -->
                 <div class="mb-4">
                     <label for="nombre" class="form-label">Nombre del empleado</label>

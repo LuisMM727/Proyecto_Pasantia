@@ -107,7 +107,7 @@ def departamento_formulario(nombre, horario):
     conexion = obtener_conexion()
     cursor = conexion.cursor() 
 
-    consulta = "INSERT INTO departamentos(nombre_departamento, activo, FK_horario) VALUES (%s, %s, %s);"
+    consulta = "INSERT INTO departamentos(nombre_departamento, activo, FK_horarios) VALUES (%s, %s, %s);"
     cursor.execute(consulta, (nombre, activo, horario ))
     conexion.commit()
 
@@ -330,10 +330,10 @@ def actualizar_empleado(id, nombre, activo, departamento):
     conexion.close()
 
 #Funcion para Actualizar dispositivos de la tabla a de la BD
-def actualizar_dispositivo(descripcion, nombre, activo, puerto, ip):
+def actualizar_dispositivo(id, descripcion, nombre, activo, puerto, ip):
     conexion = obtener_conexion()
     with conexion.cursor() as cursor:
-        cursor.execute("""UPDATE dispositivos SET descripcion_dispositivo = %s, nombre_dispositivo = %s, activo = %s, puerto = %s""", (descripcion, nombre, activo, puerto, ip))
+        cursor.execute("""UPDATE dispositivos SET descripcion_dispositivo = %s, nombre_dispositivo = %s, activo = %s, puerto = %s, IP_dispositivo = %s WHERE id_dispositivo = %s""", (descripcion, nombre, activo, puerto, ip, id))
     conexion.commit()
     conexion.close()
 
@@ -341,25 +341,25 @@ def actualizar_dispositivo(descripcion, nombre, activo, puerto, ip):
 def actualizar_horarios(id, descripcion, entrada_manana, salida_manana, tolerancia_manana, entrada_tarde, salida_tarde, tolerancia_tarde, activo):
     conexion = obtener_conexion()
     with conexion.cursor() as cursor:
-        cursor.execute("""UPDATE dispositivos SET descripcion = %s, entrada_manana = %s, salida_manana = %s, tolerancia_manana = %s, SET entrada_tarde = %s, SET salida_tarde = %s, SET tolerancia_tarde = %s,  SET activo = %s""", (descripcion, entrada_manana, salida_manana, tolerancia_manana, entrada_tarde, salida_tarde, tolerancia_tarde, activo))
+        cursor.execute("""UPDATE horarios SET descripcion = %s, entrada_manana = %s, salida_manana = %s, tolerancia_manana = %s, entrada_tarde = %s, salida_tarde = %s, tolerancia_tarde = %s, activo = %s WHERE id_horario = %s""", (descripcion, entrada_manana, salida_manana, tolerancia_manana, entrada_tarde, salida_tarde, tolerancia_tarde, activo, id))
     conexion.commit()
     conexion.close()
 
 
 #Funcion para Actualizar departamentos de la tabla a de la BD
-def actualizar_departamentos(nombre, activo, horario):
+def actualizar_departamentos(id, nombre, activo, horario):
     conexion = obtener_conexion()
     with conexion.cursor() as cursor:
-        cursor.execute("""UPDATE departamentos SET nombre = %s, activo = %s, FK_horario = %s""", (nombre, activo, horario))
+        cursor.execute("""UPDATE departamentos SET nombre_departamento = %s, activo = %s, FK_horarios = %s WHERE id_departamento = %s""", (nombre, activo, horario, id))
     conexion.commit()
     conexion.close()
 
 
 #Funcion para Actualizar usuarios de la tabla a de la BD
-def actualizar_usuarios(nombre, password, activo, rol):
+def actualizar_usuarios(id, nombre, password, activo, rol):
     conexion = obtener_conexion()
     with conexion.cursor() as cursor:
-        cursor.execute("""UPDATE usuarios SET nombre_usuario = %s, password = %s, activo = %s , rol = %s""", (nombre, password, activo, rol))
+        cursor.execute("""UPDATE usuarios SET nombre_usuario = %s, password_usuario = %s, activo = %s , rol = %s WHERE id_usuario = %s""", (nombre, password, activo, rol, id))
     conexion.commit()
     conexion.close()
 

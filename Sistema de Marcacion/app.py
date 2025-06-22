@@ -1,6 +1,6 @@
 from flask import Flask, render_template, request, redirect, session, url_for, flash
 from modulos.conexionDB import conexion as con
-from werkzeug.security import check_password_hash
+from werkzeug.security import check_password_hash, generate_password_hash
 from modulos.funciones import (
     obtener_marcacion, Capturar_DatosZK, dispositivo_ZK, obtener_dispositivos,
     obtener_empleados, obtener_horarios, obtener_departamentos, obtener_usuarios,
@@ -100,9 +100,9 @@ def editar_dispositivo(id):
         activo = 1 if 'activo' in request.form else 0
         puerto = request.form['puerto']
         ip = request.form['ip']
-        actualizar_dispositivo(descripcion, nombre, activo, puerto, ip, )
+        actualizar_dispositivo(id, descripcion, nombre, activo, puerto, ip, )
         flash('Dispositivo actualizado correctamente', 'success')
-        return redirect(url_for('empleados'))
+        return redirect(url_for('dispositivos'))
 
     return render_template('editar_dispositivos.html', dispositivos=dispositivos)
 
@@ -111,9 +111,10 @@ def editar_dispositivo(id):
 def marcacion():
     if 'usuario' not in session:
         return redirect(url_for('login'))
-
+    
+    usuario = session['usuario']
     marcacion = obtener_marcacion()
-    return render_template("marcacion.html", marcacion=marcacion)
+    return render_template("marcacion.html", marcacion=marcacion, usuario=usuario)
 
 # Pantalla de empleados
 @app.route('/empleados')
@@ -153,11 +154,10 @@ def editar_empleado(id):
     departamentos = Departamentos()
 
     if request.method == 'POST':
-        id_empleado = request.form['id']
         nombre = request.form['nombre']
         activo = 1 if 'activo' in request.form else 0
         departamento = request.form['departamento']
-        actualizar_empleado(id_empleado, nombre, activo, departamento)
+        actualizar_empleado(id, nombre, activo, departamento)
         flash('Empleado actualizado correctamente', 'success')
         return redirect(url_for('empleados'))
 
@@ -209,7 +209,7 @@ def editar_horario(id):
         salida_tarde = request.form['salida_tarde']
         tolerancia_tarde = request.form['tolerancia_tarde']
         activo = 1 if 'activo' in request.form else 0
-        actualizar_horarios(descripcion, entrada_manana, salida_manana, tolerancia_manana, entrada_tarde, salida_tarde, tolerancia_tarde, activo)
+        actualizar_horarios(id, descripcion, entrada_manana, salida_manana, tolerancia_manana, entrada_tarde, salida_tarde, tolerancia_tarde, activo)
         flash('Horario actualizado correctamente', 'success')
         return redirect(url_for('horarios'))
 
@@ -233,7 +233,7 @@ def agregar_departamento():
     horarios = obtener_horarios_Departamentos()
 
     if request.method == 'POST':
-        nombre = request.form['descripcion']
+        nombre = request.form['nombre']
         horario = int(request.form['id_horario'])
         departamento_formulario(nombre, horario)
         flash('Departamento agregado correctamente', 'success')
@@ -254,7 +254,7 @@ def editar_departamento(id):
         nombre = request.form['nombre']
         horario = int(request.form['id_horario'])
         activo = 1 if 'activo' in request.form else 0
-        actualizar_departamentos(nombre, horario, activo)
+        actualizar_departamentos(id, nombre, horario, activo)
         flash('Departamento actualizado correctamente', 'success')
         return redirect(url_for('departamentos'))
 
@@ -274,6 +274,7 @@ def usuarios():
 # Pantalla agregar usuario
 @app.route('/agregar_usuario', methods=['GET', 'POST'])
 def agregar_usuario():
+    
     if 'usuario' not in session:
         return redirect(url_for('login'))
 
@@ -306,10 +307,10 @@ def editar_usuario(id):
     if request.method == 'POST':
         nombre = request.form['nombre']
         password = request.form['password']
-        password_hash = password_hash(password)
+        password_hash = generate_password_hash(password)
         rol = request.form['rol'] == 'True' 
         activo = 1 if 'activo' in request.form else 0
-        actualizar_usuarios(nombre, password_hash, activo, rol)
+        actualizar_usuarios(id,nombre, password_hash, activo, rol)
         flash('Usuario actualizado correctamente', 'success')
         return redirect(url_for('usuarios'))
 
