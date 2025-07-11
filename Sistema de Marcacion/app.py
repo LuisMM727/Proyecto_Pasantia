@@ -31,7 +31,7 @@ def login():
             if check_password_hash(datos['password_usuario'], password):
                 session['usuario'] = datos['nombre_usuario']
                 session['rol'] = bool(datos['rol'])  
-                return redirect(url_for('index'))
+                return redirect(url_for('index') ) 
             else:
                 flash('Contraseña incorrecta', 'danger')
         else:
@@ -43,6 +43,7 @@ def login():
 # Pantalla index-Home
 @app.route('/index', methods=['GET', 'POST'])
 def index():
+    flash('Se a iniciado Sesion Correctamente', 'success')
     if 'usuario' not in session:
         return redirect(url_for('login'))
 
